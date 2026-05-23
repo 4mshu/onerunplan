@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>onerunplan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F5F2EC; --ink: #1A1814; --ink2: #5C5750; --ink3: #9C9589;
+      --accent: #C84B2F; --accent2: #2E6B4F;
+      --line: #DDD9D0; --card: #FDFBF7;
+      --run: #EAF3DE; --run-ink: #2E6B4F;
+      --walk: #FDF3E3; --walk-ink: #8A4D1D;
+      --cross: #E8EFF8; --cross-ink: #1D4D8A;
+      --rest: #F0EEE9; --rest-ink: #5C5750;
+      --race: #FAE8E4; --race-ink: #C84B2F;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--ink); font-family: 'DM Mono', monospace; min-height: 100vh; }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+    .page { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 0 24px 80px; }
+    header { padding: 64px 0 48px; border-bottom: 1px solid var(--line); margin-bottom: 40px; }
+    .logo { font-family: 'Fraunces', serif; font-size: 13px; font-weight: 300; letter-spacing: 0.12em; text-transform: lowercase; color: var(--ink3); margin-bottom: 20px; }
+    h1 { font-family: 'Fraunces', serif; font-size: clamp(38px, 8vw, 58px); font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 16px; }
+    h1 em { font-style: italic; font-weight: 300; color: var(--accent); }
+    .tagline { font-size: 12px; color: var(--ink3); letter-spacing: 0.05em; line-height: 1.7; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 40px; }
+    .stat { background: var(--card); padding: 16px 14px; }
+    .stat-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 6px; }
+    .stat-value { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; }
+    .stat-sub { font-size: 9px; color: var(--ink3); margin-top: 4px; letter-spacing: 0.04em; }
+    .progress-wrap { margin-bottom: 40px; }
+    .progress-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink3); letter-spacing: 0.05em; margin-bottom: 8px; }
+    .progress-track { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .section-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-bottom: 12px; padding-left: 2px; }
+    .week { border: 1px solid var(--line); border-radius: 6px; background: var(--card); margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.2s; }
+    .week:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .week-header { display: flex; align-items: center; gap: 14px; padding: 16px 18px; cursor: pointer; user-select: none; transition: background 0.15s; }
+    .week-header:hover { background: rgba(0,0,0,0.02); }
+    .week-num { font-family: 'Fraunces', serif; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .type-a .week-num { background: var(--run);   color: var(--run-ink); }
+    .type-b .week-num { background: var(--cross);  color: var(--cross-ink); }
+    .type-c .week-num { background: var(--walk);   color: var(--walk-ink); }
+    .type-d .week-num { background: #E8F4F0; color: #1D5C47; }
+    .type-race .week-num { background: var(--race); color: var(--race-ink); font-size: 14px; }
+    .week-info { flex: 1; }
+    .week-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+    .week-sub { font-size: 10px; color: var(--ink3); letter-spacing: 0.04em; }
+    .week-km { font-size: 11px; color: var(--ink3); text-align: right; white-space: nowrap; }
+    .week-arrow { font-size: 10px; color: var(--ink3); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+    .week-arrow.open { transform: rotate(90deg); }
+    .week-body { display: none; padding: 0 18px 16px; }
+    .week-body.open { display: block; }
+    .day-list { display: flex; flex-direction: column; gap: 6px; }
+    .day { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 4px; background: var(--bg); border: 1px solid transparent; transition: border-color 0.15s, background 0.15s; cursor: pointer; }
+    .day:hover { border-color: var(--line); }
+    .day.checked { opacity: 0.55; }
+    .day.checked .day-name { text-decoration: line-through; }
+    .checkbox { width: 16px; height: 16px; border: 1.5px solid var(--line); border-radius: 3px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
+    .day.checked .checkbox { background: var(--accent2); border-color: var(--accent2); }
+    .checkmark { display: none; color: white; font-size: 10px; line-height: 1; }
+    .day.checked .checkmark { display: block; }
+    .day-meta { flex-shrink: 0; width: 56px; }
+    .day-date { font-size: 10px; color: var(--ink3); letter-spacing: 0.03em; }
+    .day-content { flex: 1; }
+    .day-badge { display: inline-block; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 20px; font-weight: 500; margin-bottom: 4px; }
+    .badge-run    { background: var(--run);   color: var(--run-ink); }
+    .badge-long   { background: var(--walk);  color: var(--walk-ink); }
+    .badge-rest   { background: var(--rest);  color: var(--rest-ink); }
+    .badge-race   { background: var(--race);  color: var(--race-ink); }
+    .badge-warmup { background: var(--cross); color: var(--cross-ink); }
+    .badge-tempo  { background: var(--cross); color: var(--cross-ink); }
+    .day-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 3px; font-family: 'DM Mono', monospace; }
+    .day-desc { font-size: 11px; color: var(--ink2); line-height: 1.6; }
+    .tip { margin-top: 10px; padding: 10px 12px; border-left: 2px solid var(--accent); border-radius: 0 4px 4px 0; font-size: 11px; color: var(--ink2); line-height: 1.6; background: rgba(200,75,47,0.04); }
+    footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+    .footer-brand { font-family: 'Fraunces', serif; font-size: 12px; font-weight: 300; font-style: italic; color: var(--ink3); }
+    .footer-date { font-size: 10px; color: var(--ink3); letter-spacing: 0.05em; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .week { animation: fadeUp 0.4s ease both; }
+    .week:nth-child(1){animation-delay:0.03s}.week:nth-child(2){animation-delay:0.06s}.week:nth-child(3){animation-delay:0.09s}.week:nth-child(4){animation-delay:0.12s}.week:nth-child(5){animation-delay:0.15s}.week:nth-child(6){animation-delay:0.18s}.week:nth-child(7){animation-delay:0.21s}.week:nth-child(8){animation-delay:0.24s}
+    @media (max-width: 480px) { .stats { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 36px; } .page { padding: 0 16px 60px; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="logo">onerunplan</div>
+    <h1>Finish the<br><em>half.</em></h1>
+    <p class="tagline">May 25 – Oct 10, 2026 &nbsp;·&nbsp; 20 weeks &nbsp;·&nbsp; 3 runs/week<br>Long runs every Saturday. Goal: cross the 21.1 km finish line.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Start date</div><div class="stat-value">May 25</div><div class="stat-sub">Monday</div></div>
+    <div class="stat"><div class="stat-label">Race day</div><div class="stat-value">Oct 10</div><div class="stat-sub">Saturday</div></div>
+    <div class="stat"><div class="stat-label">Peak long run</div><div class="stat-value">21 km</div><div class="stat-sub">Sat 26 Sep</div></div>
+    <div class="stat"><div class="stat-label">Sessions</div><div class="stat-value" id="total-sessions">—</div><div class="stat-sub">total workouts</div></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>Progress</span><span id="progress-label">0 / 0 sessions done</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="section-label">The plan — check off each session</div>
+
+  <!-- W1 -->
+  <div class="week type-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W1</div>
+      <div class="week-info"><div class="week-title">Return to movement</div><div class="week-sub">May 25 – 31 &nbsp;·&nbsp; Easy &amp; gentle</div></div>
+      <div class="week-km">~14 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body open">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 25 May</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Walk breaks totally fine. Just get moving. You should be able to hold a full conversation throughout.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 27 May</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Same energy as Monday. Slow is right this week — you're building a habit, not testing fitness.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 30 May</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 6 km</div><div class="day-desc">Walk 1 min every 2 km. No pressure on pace. Getting the legs used to longer time on feet.</div></div></div>
+      </div>
+      <div class="tip">Week 1 goal: just finish each session. Consistency beats intensity every time.</div>
+    </div>
+  </div>
+
+  <!-- W2 -->
+  <div class="week type-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W2</div>
+      <div class="week-info"><div class="week-title">Building base</div><div class="week-sub">Jun 1 – 7 &nbsp;·&nbsp; Short &amp; consistent</div></div>
+      <div class="week-km">~16 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 1 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Comfortable and easy. No watch pressure.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 3 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">First slight distance bump. Keep it conversational — if you can't talk, slow down.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 6 Jun</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 7 km</div><div class="day-desc">Walk 1 min every 2 km. Slow and steady — time on feet is the goal, not pace.</div></div></div>
+      </div>
+      <div class="tip">The 10% rule: don't increase total weekly mileage by more than 10% week-on-week. No bonus runs.</div>
+    </div>
+  </div>
+
+  <!-- W3 -->
+  <div class="week type-c">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W3</div>
+      <div class="week-info"><div class="week-title">Steady gains</div><div class="week-sub">Jun 8 – 14 &nbsp;·&nbsp; First pickups</div></div>
+      <div class="week-km">~18 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 8 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Easy and relaxed.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 10 Jun</div></div><div class="day-content"><div class="day-badge badge-tempo">Intervals</div><div class="day-name">5 km + 2×5 min pickups</div><div class="day-desc">Run easy, then add 2 × 5 min efforts at a comfortably quicker pace. Return to easy after each. Pickups = 30–60 sec/km faster than easy.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 13 Jun</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 8 km</div><div class="day-desc">Walk breaks every 2–3 km. Cover the distance — pace is irrelevant.</div></div></div>
+      </div>
+      <div class="tip">Pickups build speed without full tempo efforts — uncomfortable for 5 min, easy the rest of the time. Good trade.</div>
+    </div>
+  </div>
+
+  <!-- W4 -->
+  <div class="week type-d">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W4</div>
+      <div class="week-info"><div class="week-title">Recovery week</div><div class="week-sub">Jun 15 – 21 &nbsp;·&nbsp; Pull back &amp; absorb</div></div>
+      <div class="week-km">~14 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 15 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Very easy. This is intentional recovery — don't push.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 17 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Same. Let the body absorb weeks 1–3.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 20 Jun</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 6 km</div><div class="day-desc">Cutback long run. Easy and comfortable — it should feel almost short.</div></div></div>
+      </div>
+      <div class="tip">Recovery weeks are when fitness is actually built. Embrace the lower mileage — it's adaptation, not laziness.</div>
+    </div>
+  </div>
+
+  <!-- W5 -->
+  <div class="week type-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W5</div>
+      <div class="week-info"><div class="week-title">Building continuity</div><div class="week-sub">Jun 22 – 28 &nbsp;·&nbsp; Reducing walk breaks</div></div>
+      <div class="week-km">~20 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 22 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Comfortable. Try to run 15 min continuously before any walk break.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 24 Jun</div></div><div class="day-content"><div class="day-badge badge-tempo">Intervals</div><div class="day-name">6 km + 3×5 min pickups</div><div class="day-desc">Warm up 10 min easy, then 3 × 5 min at comfortably hard pace, 2 min easy jog between each.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 27 Jun</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 9 km</div><div class="day-desc">Walk 1 min every 3 km. You're pushing into new territory — take it easy and enjoy it.</div></div></div>
+      </div>
+      <div class="tip">Comfortably hard = you can say 3–4 words but not hold a conversation. Not a sprint — sustainable effort.</div>
+    </div>
+  </div>
+
+  <!-- W6 -->
+  <div class="week type-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W6</div>
+      <div class="week-info"><div class="week-title">Tempo introduction</div><div class="week-sub">Jun 29 – Jul 5 &nbsp;·&nbsp; First harder efforts</div></div>
+      <div class="week-km">~21 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 29 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">True easy pace — should feel almost too slow.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 1 Jul</div></div><div class="day-content"><div class="day-badge badge-tempo">Intervals</div><div class="day-name">6 km — 3×5 min pickups</div><div class="day-desc">Warm up 10 min, then 3 × 5 min at comfortably hard pace, 2 min easy between. Same structure as W5 — go slightly harder.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 4 Jul</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 10 km</div><div class="day-desc">Walk breaks every 3 km. You've run this distance before — it shouldn't feel hard.</div></div></div>
+      </div>
+      <div class="tip">You're now running farther in training than most people ever do. That's genuinely worth acknowledging.</div>
+    </div>
+  </div>
+
+  <!-- W7 -->
+  <div class="week type-c">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W7</div>
+      <div class="week-info"><div class="week-title">Pushing longer</div><div class="week-sub">Jul 6 – 12 &nbsp;·&nbsp; Building distance</div></div>
+      <div class="week-km">~22 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 6 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Easy and comfortable.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 8 Jul</div></div><div class="day-content"><div class="day-badge badge-tempo">Intervals</div><div class="day-name">6 km — 3×8 min pickups</div><div class="day-desc">Longer pickup blocks. Warm up 10 min, then 3 × 8 min hard, 2 min easy jog between each.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 11 Jul</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 11 km</div><div class="day-desc">Walk 1 min every 3 km. Steady, relaxed, proud.</div></div></div>
+      </div>
+      <div class="tip">3×8 min is a proper interval session. You'll feel it the next day — that's it working.</div>
+    </div>
+  </div>
+
+  <!-- W8 -->
+  <div class="week type-d">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W8</div>
+      <div class="week-info"><div class="week-title">Recovery week</div><div class="week-sub">Jul 13 – 19 &nbsp;·&nbsp; Rest &amp; regenerate</div></div>
+      <div class="week-km">~18 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 13 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Very easy. Let the body absorb weeks 5–7.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 15 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Same — no tempo, just easy running.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 18 Jul</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 8 km</div><div class="day-desc">Cutback long run. Should feel almost short after 11 km last week.</div></div></div>
+      </div>
+      <div class="tip">Second recovery week. Your body is rebuilding stronger. Trust the process — don't add bonus runs.</div>
+    </div>
+  </div>
+
+  <!-- W9 -->
+  <div class="week type-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W9</div>
+      <div class="week-info"><div class="week-title">Continuous tempo</div><div class="week-sub">Jul 20 – 26 &nbsp;·&nbsp; Longer hard blocks</div></div>
+      <div class="week-km">~26 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 20 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy and conversational.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 22 Jul</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">7 km — 2×10 min tempo</div><div class="day-desc">Warm up 10 min easy, then 2 × 10 min at comfortably hard pace, 3 min easy jog between.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 25 Jul</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 13 km</div><div class="day-desc">Walk 1 min every 4 km. You're well past the halfway mark of a half — this is the new normal.</div></div></div>
+      </div>
+      <div class="tip">Tempo runs train your body to sustain a harder effort. The 10 min blocks are uncomfortable — that discomfort is doing the work.</div>
+    </div>
+  </div>
+
+  <!-- W10 -->
+  <div class="week type-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W10</div>
+      <div class="week-info"><div class="week-title">Big week</div><div class="week-sub">Jul 27 – Aug 2 &nbsp;·&nbsp; Longest runs yet</div></div>
+      <div class="week-km">~27 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 27 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy recovery from last Saturday.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 29 Jul</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">7 km — 3×10 min tempo</div><div class="day-desc">Three tempo blocks. Hard but manageable. Each 10 min should feel like a challenge you can finish.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 1 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 14 km</div><div class="day-desc">New longest run. Walk every 4 km. Fuel with something at the 7 km mark — gel, banana, whatever works for you.</div></div></div>
+      </div>
+      <div class="tip">14 km is 2/3 of the half marathon distance. You're earning this, mile by mile.</div>
+    </div>
+  </div>
+
+  <!-- W11 -->
+  <div class="week type-c">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W11</div>
+      <div class="week-info"><div class="week-title">Peak block I</div><div class="week-sub">Aug 3 – 9 &nbsp;·&nbsp; Closing in on 16 km</div></div>
+      <div class="week-km">~30 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 3 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy shake-out from the big week.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 5 Aug</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 20 min continuous tempo</div><div class="day-desc">Warm up 10 min easy, then 20 min steady tempo, cool down 10 min. Your longest unbroken tempo block yet.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 8 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 16 km</div><div class="day-desc">Walk 1 min every 4 km. Over 75% of the half done in one session — take a photo at the end.</div></div></div>
+      </div>
+      <div class="tip">After 16 km you're over 75% of the half marathon distance. The hard work is almost done.</div>
+    </div>
+  </div>
+
+  <!-- W12 -->
+  <div class="week type-d">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W12</div>
+      <div class="week-info"><div class="week-title">Recovery week</div><div class="week-sub">Aug 10 – 16 &nbsp;·&nbsp; Third rest block</div></div>
+      <div class="week-km">~23 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 10 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Very easy. Absorbing the peak block.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 12 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Relaxed — no tempo effort at all.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 15 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 12 km</div><div class="day-desc">Comfortable cutback run. Should feel manageable after 16 km.</div></div></div>
+      </div>
+      <div class="tip">Third recovery week. The hay is going in the barn. You're stronger than you realise.</div>
+    </div>
+  </div>
+
+  <!-- W13 -->
+  <div class="week type-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W13</div>
+      <div class="week-info"><div class="week-title">Race sharpening</div><div class="week-sub">Aug 17 – 23 &nbsp;·&nbsp; Fine-tuning fitness</div></div>
+      <div class="week-km">~31 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 17 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy and fresh.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 19 Aug</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 25 min tempo</div><div class="day-desc">Warm up 10 min, 25 min at comfortably hard, cool down. Strong and controlled.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 22 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 17 km</div><div class="day-desc">New longest run. Walk 1 min every 4 km. Fuel at 8–9 km. Take it slow and steady.</div></div></div>
+      </div>
+      <div class="tip">This is your last fully hard block before taper. Everything from W17 is about arriving fresh to the start line.</div>
+    </div>
+  </div>
+
+  <!-- W14 -->
+  <div class="week type-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W14</div>
+      <div class="week-info"><div class="week-title">Peak block II</div><div class="week-sub">Aug 24 – 30 &nbsp;·&nbsp; Longest training runs</div></div>
+      <div class="week-km">~32 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 24 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy recovery.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 26 Aug</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 30 min tempo</div><div class="day-desc">Your longest tempo block. Warm up 10 min, 30 min at race effort, cool down.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 29 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 18 km</div><div class="day-desc">Walk 1 min every 4 km. Fuel at 9 km. This is the second biggest run of the whole plan.</div></div></div>
+      </div>
+      <div class="tip">18 km is 85% of the half marathon. At this point, race day genuinely is a victory lap.</div>
+    </div>
+  </div>
+
+  <!-- W15 -->
+  <div class="week type-c">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W15</div>
+      <div class="week-info"><div class="week-title">Peak block III</div><div class="week-sub">Aug 31 – Sep 6 &nbsp;·&nbsp; Near race distance</div></div>
+      <div class="week-km">~33 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 31 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy shake-out.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 2 Sep</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 30 min tempo</div><div class="day-desc">Same as W14. You know this now — just execute.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 5 Sep</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">🏆 Long run — 19 km</div><div class="day-desc">Your longest-ever run. Walk 1 min every 4 km. Take it slow — finishing is everything. Fuel at 9 km. Celebrate after.</div></div></div>
+      </div>
+      <div class="tip">After 19 km, you've proven you can finish a half marathon. The last 2.1 km on race day is pure adrenaline and crowd energy.</div>
+    </div>
+  </div>
+
+  <!-- W16 -->
+  <div class="week type-d">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W16</div>
+      <div class="week-info"><div class="week-title">Recovery week</div><div class="week-sub">Sep 7 – 13 &nbsp;·&nbsp; Final big rest</div></div>
+      <div class="week-km">~25 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 7 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Very easy. Absorbing peak block III.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 9 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Relaxed — no tempo at all.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 12 Sep</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 14 km</div><div class="day-desc">Comfortable cutback run. Should feel easy after 19 km. Savour how far you've come.</div></div></div>
+      </div>
+      <div class="tip">Fourth recovery week. The hay is in the barn. You're ready — you're just not fully rested yet.</div>
+    </div>
+  </div>
+
+  <!-- W17 -->
+  <div class="week type-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W17</div>
+      <div class="week-info"><div class="week-title">Race sharpening II</div><div class="week-sub">Sep 14 – 20 &nbsp;·&nbsp; Final hard efforts</div></div>
+      <div class="week-km">~33 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 14 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy and fresh.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 16 Sep</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 25 min tempo</div><div class="day-desc">Warm up 10 min, 25 min at comfortably hard, cool down. Precise and controlled.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 19 Sep</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 19 km</div><div class="day-desc">Final 19 km. You know exactly how to pace this now. Walk breaks every 4 km. Fuel at 9 km.</div></div></div>
+      </div>
+      <div class="tip">Two more hard weeks, then taper. You're almost there.</div>
+    </div>
+  </div>
+
+  <!-- W18 -->
+  <div class="week type-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W18</div>
+      <div class="week-info"><div class="week-title">Final hard week</div><div class="week-sub">Sep 21 – 27 &nbsp;·&nbsp; Dress rehearsal</div></div>
+      <div class="week-km">~35 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 21 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 23 Sep</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 20 min tempo</div><div class="day-desc">Slightly shorter than last week — this is sharpening, not building. Warm up 10 min, 20 min tempo, cool down.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 26 Sep</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 21 km</div><div class="day-desc">Full race distance in training. Same gear, same fuel, same start time if possible. Walk breaks every 4 km. This is the dress rehearsal — race day has no unknowns after this.</div></div></div>
+      </div>
+      <div class="tip">Running 21 km in training means race day has zero unknowns. You've already done this. Now you just do it with a medal at the end.</div>
+    </div>
+  </div>
+
+  <!-- W19 -->
+  <div class="week type-c">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">W19</div>
+      <div class="week-info"><div class="week-title">Taper week</div><div class="week-sub">Sep 28 – Oct 4 &nbsp;·&nbsp; Freshen the legs</div></div>
+      <div class="week-km">~20 km</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 28 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Easy. Legs should feel fresh — that's the taper working.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 30 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Relaxed. No tempo, no pressure whatsoever.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 3 Oct</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Easy 10 km</div><div class="day-desc">Comfortable taper run. Savour how easy 10 km feels now — that's 19 weeks of work paying off.</div></div></div>
+      </div>
+      <div class="tip">Taper anxiety is real — you'll feel restless and under-trained. Resist the urge to add extra runs. Rest IS the training now.</div>
+    </div>
+  </div>
+
+  <!-- W20 RACE WEEK -->
+  <div class="week type-race">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <div class="week-num">🏁</div>
+      <div class="week-info"><div class="week-title">Race week — Oct 10</div><div class="week-sub">The final countdown</div></div>
+      <div class="week-km">~8 km + race</div><div class="week-arrow">▶</div>
+    </div>
+    <div class="week-body">
+      <div class="day-list">
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 5 Oct</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Last easy run. Short and breezy — enjoy it.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 7 Oct</div></div><div class="day-content"><div class="day-badge badge-warmup">Shakeout</div><div class="day-name">3 km + strides</div><div class="day-desc">3 easy km, then 4 × 20-second strides (quick but relaxed). Wakes up fast-twitch muscles without tiring them.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Fri 9 Oct</div></div><div class="day-content"><div class="day-badge badge-rest">Rest</div><div class="day-name">Full rest — race eve</div><div class="day-desc">Lay out your kit. Pin your bib. Set two alarms. Eat a normal dinner — nothing new. Sleep early.</div></div></div>
+        <div class="day" onclick="toggleDay(this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 10 Oct</div></div><div class="day-content"><div class="day-badge badge-race">Race day</div><div class="day-name">🏁 21.1 km — the half marathon</div><div class="day-desc">Start 30 sec/km slower than feels right. Everyone sprints at the gun — let them. Walk breaks every 4 km are fine. Your only goal is to cross the line. Everything else is bonus.</div></div></div>
+      </div>
+      <div class="tip">Your only goal is to cross the finish line. There is no wrong finishing time. Every finisher is a winner.</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-brand">onerunplan</div>
+    <div class="footer-date">Race day: Sat Oct 10, 2026</div>
+  </footer>
+
+</div>
+<script>
+  function toggleWeek(header) {
+    const body = header.nextElementSibling;
+    const arrow = header.querySelector('.week-arrow');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arrow.classList.toggle('open', !isOpen);
+  }
+  function toggleDay(el) {
+    el.classList.toggle('checked');
+    saveState();
+    updateProgress();
+  }
+  function updateProgress() {
+    const all = document.querySelectorAll('.day');
+    const done = document.querySelectorAll('.day.checked');
+    const total = all.length;
+    const pct = total ? Math.round((done.length / total) * 100) : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = done.length + ' / ' + total + ' sessions done';
+    document.getElementById('total-sessions').textContent = total;
+  }
+  function saveState() {
+    const days = document.querySelectorAll('.day');
+    const state = Array.from(days).map(d => d.classList.contains('checked'));
+    try { localStorage.setItem('onerunplan-oct-state', JSON.stringify(state)); } catch(e) {}
+  }
+  function loadState() {
+    try {
+      const raw = localStorage.getItem('onerunplan-oct-state');
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      const days = document.querySelectorAll('.day');
+      days.forEach((d, i) => { if (state[i]) d.classList.add('checked'); });
+    } catch(e) {}
+  }
+  loadState();
+  updateProgress();
+</script>
+</body>
+</html>
