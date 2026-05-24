@@ -3,106 +3,340 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>onerunplan</title>
+  <title>onerunplan — Finish the half.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #F5F2EC; --ink: #1A1814; --ink2: #5C5750; --ink3: #9C9589;
-      --accent: #C84B2F; --accent2: #2E6B4F;
-      --line: #DDD9D0; --card: #FDFBF7;
-      --run: #EAF3DE; --run-ink: #2E6B4F;
-      --walk: #FDF3E3; --walk-ink: #8A4D1D;
-      --cross: #E8EFF8; --cross-ink: #1D4D8A;
-      --rest: #F0EEE9; --rest-ink: #5C5750;
-      --race: #FAE8E4; --race-ink: #C84B2F;
+      --bg: #F7F4EE;
+      --paper: #FDFAF5;
+      --ink: #1C1A17;
+      --ink2: #4A4640;
+      --ink3: #8A8278;
+      --line: #E0DBD0;
+      --accent: #B84030;
+      --accent-light: #F5E8E5;
+      --green: #2A5C42;
+      --green-light: #E4EFE9;
+      --blue: #1D3E6E;
+      --blue-light: #E5ECF7;
+      --amber: #7A4E1A;
+      --amber-light: #F5EBD8;
+      --purple: #3D2875;
+      --purple-light: #EAE5F5;
+      --gold: #C09020;
     }
     html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--ink); font-family: 'DM Mono', monospace; min-height: 100vh; }
-    body::before {
-      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.4;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      font-size: 13px;
     }
-    .page { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 0 24px 80px; }
-    header { padding: 64px 0 48px; border-bottom: 1px solid var(--line); margin-bottom: 40px; }
-    .logo { font-family: 'Fraunces', serif; font-size: 13px; font-weight: 300; letter-spacing: 0.12em; text-transform: lowercase; color: var(--ink3); margin-bottom: 20px; }
-    h1 { font-family: 'Fraunces', serif; font-size: clamp(38px, 8vw, 58px); font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 16px; }
-    h1 em { font-style: italic; font-weight: 300; color: var(--accent); }
-    .tagline { font-size: 12px; color: var(--ink3); letter-spacing: 0.05em; line-height: 1.7; }
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 40px; }
-    .stat { background: var(--card); padding: 16px 14px; }
-    .stat-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 6px; }
-    .stat-value { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; }
+
+    /* grain overlay */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .page { max-width: 720px; margin: 0 auto; padding: 0 24px 100px; position: relative; z-index: 1; }
+
+    /* ─── HEADER ─── */
+    header {
+      padding: 72px 0 52px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 48px;
+      position: relative;
+    }
+    .logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--ink3); margin-bottom: 24px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo::before { content: ''; display: block; width: 24px; height: 1px; background: var(--ink3); }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(44px, 9vw, 72px);
+      font-weight: 700; line-height: 0.95;
+      letter-spacing: -0.02em;
+      color: var(--ink); margin-bottom: 20px;
+    }
+    h1 em { font-style: italic; color: var(--accent); font-weight: 400; }
+    .tagline {
+      font-size: 11px; color: var(--ink3);
+      letter-spacing: 0.06em; line-height: 2;
+      max-width: 480px;
+    }
+    .race-badge {
+      position: absolute; top: 72px; right: 0;
+      background: var(--ink); color: var(--bg);
+      padding: 10px 16px; font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      line-height: 1.7;
+    }
+    .race-badge strong { display: block; font-family: 'Playfair Display', serif; font-size: 20px; letter-spacing: -0.01em; font-weight: 700; }
+
+    /* ─── PACE CARD ─── */
+    .pace-card {
+      background: var(--ink);
+      color: var(--bg);
+      border-radius: 4px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .pace-card-title {
+      grid-column: 1 / -1;
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--ink3); margin-bottom: 4px;
+    }
+    .pace-zone { }
+    .pace-zone-name { font-size: 9px; letter-spacing: 0.1em; color: var(--ink3); margin-bottom: 4px; text-transform: uppercase; }
+    .pace-zone-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #F7F4EE; line-height: 1; }
+    .pace-zone-desc { font-size: 10px; color: #8A8278; margin-top: 3px; }
+    .pace-divider { grid-column: 1 / -1; height: 1px; background: #333; }
+
+    /* ─── STATS ─── */
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--line);
+      border: 1px solid var(--line); border-radius: 4px;
+      overflow: hidden; margin-bottom: 20px;
+    }
+    .stat { background: var(--paper); padding: 18px 14px; }
+    .stat-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1; }
     .stat-sub { font-size: 9px; color: var(--ink3); margin-top: 4px; letter-spacing: 0.04em; }
+
+    /* ─── REST BAR ─── */
+    .rest-bar {
+      background: var(--purple-light);
+      border: 1px solid #C8BEE8;
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .rest-bar-left { flex: 1; }
+    .rest-bar-title { font-size: 11px; font-weight: 500; color: var(--purple); margin-bottom: 2px; letter-spacing: 0.02em; }
+    .rest-bar-sub { font-size: 10px; color: #6A58A8; }
+    .rest-bar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .rest-bar-actions select {
+      font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 8px;
+      border: 1px solid #C8BEE8; border-radius: 3px; background: white;
+      color: var(--purple); cursor: pointer;
+    }
+    .btn-insert-rest {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
+      padding: 7px 14px; border-radius: 3px; border: none;
+      background: var(--purple); color: white; cursor: pointer;
+      transition: opacity 0.15s; white-space: nowrap;
+    }
+    .btn-insert-rest:hover { opacity: 0.8; }
+
+    /* ─── PROGRESS ─── */
     .progress-wrap { margin-bottom: 40px; }
     .progress-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink3); letter-spacing: 0.05em; margin-bottom: 8px; }
-    .progress-track { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-    .section-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-bottom: 12px; padding-left: 2px; }
-    .week { border: 1px solid var(--line); border-radius: 6px; background: var(--card); margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.2s; }
-    .week:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-    .week-header { display: flex; align-items: center; gap: 14px; padding: 16px 18px; cursor: pointer; user-select: none; transition: background 0.15s; }
-    .week-header:hover { background: rgba(0,0,0,0.02); }
-    .week-num { font-family: 'Fraunces', serif; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .type-a .week-num { background: var(--run);   color: var(--run-ink); }
-    .type-b .week-num { background: var(--cross);  color: var(--cross-ink); }
-    .type-c .week-num { background: var(--walk);   color: var(--walk-ink); }
-    .type-d .week-num { background: #E8F4F0; color: #1D5C47; }
-    .type-race .week-num { background: var(--race); color: var(--race-ink); font-size: 14px; }
+    .progress-track { height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+
+    /* ─── SECTION LABEL ─── */
+    .section-label {
+      font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ink3); margin-bottom: 14px; padding-left: 2px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+    /* ─── WEEK CARD ─── */
+    .week {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--paper);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .week-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px; cursor: pointer; user-select: none;
+      transition: background 0.15s;
+    }
+    .week-header:hover { background: rgba(0,0,0,0.018); }
+
+    .week-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 11px; font-weight: 700;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; letter-spacing: 0;
+    }
+    /* week type colours */
+    .type-base .week-num       { background: var(--green-light); color: var(--green); }
+    .type-interval .week-num   { background: var(--blue-light);  color: var(--blue); }
+    .type-tempo .week-num      { background: var(--amber-light); color: var(--amber); }
+    .type-recovery .week-num   { background: var(--line);        color: var(--ink3); }
+    .type-race .week-num       { background: var(--accent); color: white; font-size: 16px; }
+    .type-downtime             { border-color: #C8BEE8; background: var(--purple-light); }
+    .type-downtime .week-num   { background: #D8D0F0; color: var(--purple); font-size: 16px; }
+    .type-downtime .week-title { color: var(--purple); }
+    .type-downtime .week-sub   { color: #7060B0; }
+    .type-downtime .week-km    { color: #7060B0; }
+    .type-downtime .week-header:hover { background: rgba(74,61,138,0.03); }
+
     .week-info { flex: 1; }
-    .week-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
-    .week-sub { font-size: 10px; color: var(--ink3); letter-spacing: 0.04em; }
-    .week-km { font-size: 11px; color: var(--ink3); text-align: right; white-space: nowrap; }
-    .week-arrow { font-size: 10px; color: var(--ink3); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+    .week-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+    .week-sub { font-size: 10px; color: var(--ink3); letter-spacing: 0.03em; }
+    .week-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+    .week-km { font-size: 11px; color: var(--ink3); white-space: nowrap; }
+    .week-focus { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); }
+    .week-arrow { font-size: 9px; color: var(--ink3); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); margin-left: 6px; }
     .week-arrow.open { transform: rotate(90deg); }
-    .week-body { display: none; padding: 0 18px 16px; }
+
+    .week-body { display: none; padding: 0 20px 18px; }
     .week-body.open { display: block; }
-    .day-list { display: flex; flex-direction: column; gap: 6px; }
-    .day { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 4px; background: var(--bg); border: 1px solid transparent; transition: border-color 0.15s, background 0.15s; cursor: pointer; }
+
+    /* ─── DAYS ─── */
+    .day-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .day {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px; border-radius: 4px;
+      background: var(--bg); border: 1px solid transparent;
+      transition: border-color 0.15s; cursor: pointer; position: relative;
+    }
     .day:hover { border-color: var(--line); }
-    .day.checked { opacity: 0.55; }
+    .day.checked { opacity: 0.45; }
     .day.checked .day-name { text-decoration: line-through; }
-    .checkbox { width: 16px; height: 16px; border: 1.5px solid var(--line); border-radius: 3px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
-    .day.checked .checkbox { background: var(--accent2); border-color: var(--accent2); }
+
+    .checkbox {
+      width: 17px; height: 17px; border: 1.5px solid var(--line);
+      border-radius: 3px; flex-shrink: 0; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .day.checked .checkbox { background: var(--green); border-color: var(--green); }
     .checkmark { display: none; color: white; font-size: 10px; line-height: 1; }
     .day.checked .checkmark { display: block; }
-    .day-meta { flex-shrink: 0; width: 56px; }
-    .day-date { font-size: 10px; color: var(--ink3); letter-spacing: 0.03em; }
-    .day-content { flex: 1; }
-    .day-badge { display: inline-block; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 20px; font-weight: 500; margin-bottom: 4px; }
-    .badge-run    { background: var(--run);   color: var(--run-ink); }
-    .badge-long   { background: var(--walk);  color: var(--walk-ink); }
-    .badge-rest   { background: var(--rest);  color: var(--rest-ink); }
-    .badge-race   { background: var(--race);  color: var(--race-ink); }
-    .badge-warmup { background: var(--cross); color: var(--cross-ink); }
-    .badge-tempo  { background: var(--cross); color: var(--cross-ink); }
-    .day-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 3px; font-family: 'DM Mono', monospace; }
-    .day-desc { font-size: 11px; color: var(--ink2); line-height: 1.6; }
-    .tip { margin-top: 10px; padding: 10px 12px; border-left: 2px solid var(--accent); border-radius: 0 4px 4px 0; font-size: 11px; color: var(--ink2); line-height: 1.6; background: rgba(200,75,47,0.04); }
-    footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
-    .footer-brand { font-family: 'Fraunces', serif; font-size: 12px; font-weight: 300; font-style: italic; color: var(--ink3); }
-    .footer-date { font-size: 10px; color: var(--ink3); letter-spacing: 0.05em; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    .week { animation: fadeUp 0.4s ease both; }
-    .week:nth-child(1){animation-delay:0.03s}.week:nth-child(2){animation-delay:0.06s}.week:nth-child(3){animation-delay:0.09s}.week:nth-child(4){animation-delay:0.12s}.week:nth-child(5){animation-delay:0.15s}.week:nth-child(6){animation-delay:0.18s}.week:nth-child(7){animation-delay:0.21s}.week:nth-child(8){animation-delay:0.24s}
 
-    /* reschedule styles */
+    .day-meta { flex-shrink: 0; width: 64px; }
+    .day-date { font-size: 10px; color: var(--ink3); letter-spacing: 0.02em; line-height: 1.5; }
+    .day-content { flex: 1; }
+
+    .day-badge {
+      display: inline-block; font-size: 8px; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 2px 8px; border-radius: 20px;
+      font-weight: 500; margin-bottom: 5px;
+    }
+    .badge-easy    { background: var(--green-light); color: var(--green); }
+    .badge-long    { background: var(--amber-light); color: var(--amber); }
+    .badge-interval{ background: var(--blue-light);  color: var(--blue); }
+    .badge-tempo   { background: #FFF3E0;            color: #B06000; }
+    .badge-rest    { background: var(--line);         color: var(--ink3); }
+    .badge-shakeout{ background: var(--blue-light);   color: var(--blue); }
+    .badge-race    { background: var(--accent);       color: white; }
+
+    .day-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+    .day-desc { font-size: 11px; color: var(--ink2); line-height: 1.65; }
+
+    /* ─── PACE TAG ─── */
+    .pace-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; color: var(--ink3); margin-top: 5px;
+      padding: 3px 8px; background: var(--paper);
+      border: 1px solid var(--line); border-radius: 20px;
+    }
+    .pace-tag .pt-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .pace-tag .pt-val { font-weight: 500; color: var(--ink); }
+
+    /* ─── WORKOUT BREAKDOWN (Amazfit) ─── */
+    .workout-breakdown {
+      margin-top: 10px;
+      background: var(--blue-light);
+      border: 1px solid #C0CCE8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .wb-title {
+      padding: 8px 12px; font-size: 9px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--blue);
+      background: rgba(29,62,110,0.06);
+      border-bottom: 1px solid #C0CCE8;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .wb-title::before { content: '⌚'; font-size: 11px; }
+    .wb-steps { display: flex; flex-direction: column; }
+    .wb-step {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-bottom: 1px solid rgba(29,62,110,0.08);
+      font-size: 11px;
+    }
+    .wb-step:last-child { border-bottom: none; }
+    .wb-step-num {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--blue); color: white;
+      font-size: 9px; font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .wb-step-type { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue); flex-shrink: 0; width: 56px; }
+    .wb-step-detail { flex: 1; color: var(--ink); }
+    .wb-step-pace { font-size: 10px; color: var(--ink3); white-space: nowrap; }
+    .wb-step.step-warm { border-left: 3px solid var(--green); }
+    .wb-step.step-work { border-left: 3px solid var(--accent); }
+    .wb-step.step-rec  { border-left: 3px solid var(--ink3); }
+    .wb-step.step-cool { border-left: 3px solid var(--blue); }
+
+    /* ─── TIP ─── */
+    .week-tip {
+      padding: 11px 14px;
+      border-left: 2px solid var(--accent);
+      background: var(--accent-light);
+      border-radius: 0 4px 4px 0;
+      font-size: 11px; color: var(--ink2); line-height: 1.7;
+    }
+
+    /* ─── DOWNTIME BODY ─── */
+    .downtime-body {
+      padding: 12px 20px 16px;
+      background: rgba(61,40,117,0.04);
+      border-top: 1px solid #C8BEE8;
+    }
+    .downtime-body p { font-size: 11px; color: #6A58A8; line-height: 1.7; }
+    .downtime-remove {
+      margin-top: 10px; font-family: 'DM Mono', monospace;
+      font-size: 9px; letter-spacing: 0.05em;
+      padding: 4px 10px; border: 1px solid #C8BEE8;
+      border-radius: 3px; background: none; color: #7060B0;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .downtime-remove:hover { background: #C8BEE8; color: var(--purple); }
+
+    /* ─── RESCHEDULE ─── */
     .reschedule-btn {
       display: none; background: none; border: 1px solid var(--line);
-      border-radius: 3px; font-size: 9px; color: var(--ink3); letter-spacing: 0.05em;
-      padding: 2px 7px; cursor: pointer; margin-top: 6px; font-family: 'DM Mono', monospace;
-      transition: background 0.15s, color 0.15s;
+      border-radius: 3px; font-size: 9px; color: var(--ink3);
+      letter-spacing: 0.05em; padding: 2px 7px; cursor: pointer;
+      margin-top: 6px; font-family: 'DM Mono', monospace;
+      transition: background 0.15s;
     }
     .reschedule-btn:hover { background: var(--line); color: var(--ink); }
     .day:hover .reschedule-btn { display: inline-block; }
     .day.rescheduled .reschedule-btn { display: inline-block; }
     .day.rescheduled .day-date { color: var(--accent); font-weight: 500; }
+    .popup-anchor { position: relative; display: inline-block; }
     .reschedule-popup {
-      position: absolute; background: var(--card); border: 1px solid var(--line);
+      position: absolute; background: var(--paper); border: 1px solid var(--line);
       border-radius: 6px; padding: 14px 16px; z-index: 200;
       box-shadow: 0 4px 20px rgba(0,0,0,0.10); font-family: 'DM Mono', monospace;
-      min-width: 240px;
+      min-width: 240px; left: 0; top: 26px;
     }
     .reschedule-popup .rp-label { font-size: 10px; color: var(--ink3); margin-bottom: 10px; line-height: 1.5; }
     .reschedule-popup .rp-label strong { color: var(--ink); font-weight: 500; }
@@ -115,31 +349,105 @@
     .reschedule-popup button {
       font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 10px;
       border-radius: 3px; border: 1px solid var(--line); background: none;
-      cursor: pointer; color: var(--ink); letter-spacing: 0.03em; transition: background 0.15s;
+      cursor: pointer; color: var(--ink); transition: background 0.15s;
     }
     .reschedule-popup button:hover { background: var(--line); }
     .reschedule-popup .rp-confirm { background: var(--accent); color: white; border-color: var(--accent); }
-    .reschedule-popup .rp-confirm:hover { background: #b0421f; }
+    .reschedule-popup .rp-confirm:hover { background: #9A3525; }
     .reschedule-popup .rp-reset { color: var(--ink3); }
-    .popup-anchor { position: relative; display: inline-block; }
 
-    @media (max-width: 480px) { .stats { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 36px; } .page { padding: 0 16px 60px; } }
+    /* ─── FOOTER ─── */
+    footer {
+      margin-top: 64px; padding-top: 24px;
+      border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px; font-style: italic; font-weight: 400;
+      color: var(--ink3);
+    }
+    .footer-date { font-size: 10px; color: var(--ink3); letter-spacing: 0.06em; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .week { animation: fadeUp 0.35s ease both; }
+    .week:nth-child(n) { animation-delay: calc(0.04s * var(--i, 0)); }
+
+    @media (max-width: 540px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .pace-card { grid-template-columns: 1fr 1fr; }
+      h1 { font-size: 40px; }
+      .race-badge { position: static; margin-bottom: 20px; display: inline-block; }
+      .page { padding: 0 16px 60px; }
+    }
   </style>
 </head>
 <body>
 <div class="page">
 
   <header>
+    <div class="race-badge">Race day<strong>Oct 10, 2026</strong>21.1 km</div>
     <div class="logo">onerunplan</div>
-    <h1>Finish the<br><em>half.</em></h1>
-    <p class="tagline">May 25 – Oct 10, 2026 &nbsp;·&nbsp; 20 weeks &nbsp;·&nbsp; 3 runs/week<br>Long runs every Saturday. Goal: cross the 21.1 km finish line.</p>
+    <h1>Finish<br>the <em>half.</em></h1>
+    <p class="tagline">
+      Jun 1 – Oct 10, 2026 &nbsp;·&nbsp; 16 training weeks + race week<br>
+      3 sessions/week &nbsp;·&nbsp; Long runs every Saturday<br>
+      4 built-in rest blocks — one per month
+    </p>
   </header>
 
+  <!-- PACE REFERENCE CARD -->
+  <div class="pace-card">
+    <div class="pace-card-title">Your personal pace zones — based on your 5K (8'08"/km) &amp; 10K (9'19"/km)</div>
+    <div class="pace-divider"></div>
+    <div class="pace-zone">
+      <div class="pace-zone-name">Easy / Recovery</div>
+      <div class="pace-zone-val">9'30–10'30"</div>
+      <div class="pace-zone-desc">Full conversation. Never breathless.</div>
+    </div>
+    <div class="pace-zone">
+      <div class="pace-zone-name">Long Run</div>
+      <div class="pace-zone-val">9'00–9'45"</div>
+      <div class="pace-zone-desc">Comfortable. Could speak in sentences.</div>
+    </div>
+    <div class="pace-zone">
+      <div class="pace-zone-name">Tempo / Comf. Hard</div>
+      <div class="pace-zone-val">7'15–7'45"</div>
+      <div class="pace-zone-desc">3–4 words only. Sustainably uncomfortable.</div>
+    </div>
+    <div class="pace-zone">
+      <div class="pace-zone-name">Interval / Pickup</div>
+      <div class="pace-zone-val">6'45–7'15"</div>
+      <div class="pace-zone-desc">Hard effort. Controlled, not a sprint.</div>
+    </div>
+    <div class="pace-divider"></div>
+    <div class="pace-zone" style="grid-column:1/-1">
+      <div class="pace-zone-name">Half Marathon Goal Pace</div>
+      <div class="pace-zone-val">8'30–9'00"</div>
+      <div class="pace-zone-desc">Start at 9'00" for the first 5 km. Pick up only if you feel strong past 15 km.</div>
+    </div>
+  </div>
+
   <div class="stats">
-    <div class="stat"><div class="stat-label">Start date</div><div class="stat-value">May 25</div><div class="stat-sub">Monday</div></div>
+    <div class="stat"><div class="stat-label">Start</div><div class="stat-value">Jun 1</div><div class="stat-sub">Monday</div></div>
     <div class="stat"><div class="stat-label">Race day</div><div class="stat-value">Oct 10</div><div class="stat-sub">Saturday</div></div>
-    <div class="stat"><div class="stat-label">Peak long run</div><div class="stat-value">21 km</div><div class="stat-sub">Sat 26 Sep</div></div>
+    <div class="stat"><div class="stat-label">Peak long run</div><div class="stat-value">19 km</div><div class="stat-sub">Sat 26 Sep</div></div>
     <div class="stat"><div class="stat-label">Sessions</div><div class="stat-value" id="total-sessions">—</div><div class="stat-sub">total workouts</div></div>
+  </div>
+
+  <!-- REST WEEK BAR -->
+  <div class="rest-bar">
+    <div class="rest-bar-left">
+      <div class="rest-bar-title">⏸ MNRF / TCA down week</div>
+      <div class="rest-bar-sub">Insert a rest block after any week — all future sessions shift forward. Race day stays fixed.</div>
+    </div>
+    <div class="rest-bar-actions">
+      <select id="rest-week-select"><option value="">Insert after week…</option></select>
+      <button class="btn-insert-rest" onclick="insertRestWeek()">Insert rest week</button>
+    </div>
   </div>
 
   <div class="progress-wrap">
@@ -149,356 +457,1071 @@
 
   <div class="section-label">The plan — check off each session</div>
 
-  <!-- W1 -->
-  <div class="week type-a">
+  <div id="plan-container">
+
+  <!-- ═══════════════════════════════════ JUNE ═══════════════════════════════════ -->
+
+  <!-- W1 — Jun 1–7 -->
+  <div class="week type-base" data-week="1" style="--i:1">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W1</div>
-      <div class="week-info"><div class="week-title">Return to movement</div><div class="week-sub">May 25 – 31 &nbsp;·&nbsp; Easy &amp; gentle</div></div>
-      <div class="week-km">~14 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Return to movement</div>
+        <div class="week-sub">Mon 1 Jun – Sun 7 Jun &nbsp;·&nbsp; Base building</div>
+      </div>
+      <div class="week-right"><div class="week-km">~14 km</div><div class="week-focus">Easy</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body open">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 25 May</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Walk breaks totally fine. Just get moving. You should be able to hold a full conversation throughout.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 27 May</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Same energy as Monday. Slow is right this week — you're building a habit, not testing fitness.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 30 May</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 6 km</div><div class="day-desc">Walk 1 min every 2 km. No pressure on pace. Getting the legs used to longer time on feet.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-01">Mon 1 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 4 km</div>
+            <div class="day-desc">Walk breaks totally fine. You're building a habit, not testing fitness. Stay comfortable throughout.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-03">Wed 3 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 4 km</div>
+            <div class="day-desc">Repeat Monday. Slow is exactly right this week.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-06">Sat 6 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 6 km</div>
+            <div class="day-desc">Walk 1 min every 2 km. No pressure on pace — time on feet is the only goal.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Week 1 goal: just finish each session. Consistency beats intensity every time.</div>
+      <div class="week-tip">Week 1 goal: just finish each session. Consistency beats intensity every time.</div>
     </div>
   </div>
 
-  <!-- W2 -->
-  <div class="week type-b">
+  <!-- W2 — Jun 8–14 -->
+  <div class="week type-base" data-week="2" style="--i:2">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W2</div>
-      <div class="week-info"><div class="week-title">Building base</div><div class="week-sub">Jun 1 – 7 &nbsp;·&nbsp; Short &amp; consistent</div></div>
-      <div class="week-km">~16 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Building continuity</div>
+        <div class="week-sub">Mon 8 Jun – Sun 14 Jun &nbsp;·&nbsp; Base building</div>
+      </div>
+      <div class="week-right"><div class="week-km">~16 km</div><div class="week-focus">Easy</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 1 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Comfortable and easy. No watch pressure.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 3 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">First slight distance bump. Keep it conversational — if you can't talk, slow down.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 6 Jun</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 7 km</div><div class="day-desc">Walk 1 min every 2 km. Slow and steady — time on feet is the goal, not pace.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-08">Mon 8 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 4 km</div>
+            <div class="day-desc">Comfortable and easy. No watch pressure.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-10">Wed 10 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">First slight bump in distance. If you can't hold a conversation, slow down.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-13">Sat 13 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 7 km</div>
+            <div class="day-desc">Walk 1 min every 2 km. Slow and steady — time on feet is the goal.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">The 10% rule: don't increase total weekly mileage by more than 10% week-on-week. No bonus runs.</div>
+      <div class="week-tip">The 10% rule: don't increase total weekly mileage by more than 10% week-on-week. No bonus runs.</div>
     </div>
   </div>
 
-  <!-- W3 -->
-  <div class="week type-c">
+  <!-- W3 — Jun 15–21 -->
+  <div class="week type-interval" data-week="3" style="--i:3">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W3</div>
-      <div class="week-info"><div class="week-title">Steady gains</div><div class="week-sub">Jun 8 – 14 &nbsp;·&nbsp; First pickups</div></div>
-      <div class="week-km">~18 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">First pickups</div>
+        <div class="week-sub">Mon 15 Jun – Sun 21 Jun &nbsp;·&nbsp; Introducing speed</div>
+      </div>
+      <div class="week-right"><div class="week-km">~17 km</div><div class="week-focus">Intervals</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 8 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Easy and relaxed.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 10 Jun</div></div><div class="day-content"><div class="day-badge badge-tempo">Intervals</div><div class="day-name">5 km + 2×5 min pickups</div><div class="day-desc">Run easy, then add 2 × 5 min efforts at a comfortably quicker pace. Return to easy after each. Pickups = 30–60 sec/km faster than easy.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 13 Jun</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 8 km</div><div class="day-desc">Walk breaks every 2–3 km. Cover the distance — pace is irrelevant.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-15">Mon 15 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Relaxed and conversational.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-17">Wed 17 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-interval">Intervals</div>
+            <div class="day-name">4 km — 2 × 5 min pickups</div>
+            <div class="day-desc">Easy warm-up, then 2 fast blocks, then cool down. You should be breathless but in control during the pickups.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Pickup</div><div class="wb-step-detail">5 min hard effort</div><div class="wb-step-pace">6'45–7'15" /km</div></div>
+                <div class="wb-step step-rec"><div class="wb-step-num">3</div><div class="wb-step-type">Recovery</div><div class="wb-step-detail">3 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">4</div><div class="wb-step-type">Pickup</div><div class="wb-step-detail">5 min hard effort</div><div class="wb-step-pace">6'45–7'15" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">5</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-20">Sat 20 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 8 km</div>
+            <div class="day-desc">Walk breaks every 2–3 km. Cover the distance — pace is irrelevant.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Pickups build speed without full tempo efforts — uncomfortable for 5 min, easy the rest of the time. Good trade.</div>
+      <div class="week-tip">Pickups build speed without full tempo effort — uncomfortable for 5 min, easy the rest. Good trade.</div>
     </div>
   </div>
 
-  <!-- W4 -->
-  <div class="week type-d">
+  <!-- W4 — JUNE REST WEEK — Jun 22–28 -->
+  <div class="week type-recovery" data-week="4" style="--i:4">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W4</div>
-      <div class="week-info"><div class="week-title">Recovery week</div><div class="week-sub">Jun 15 – 21 &nbsp;·&nbsp; Pull back &amp; absorb</div></div>
-      <div class="week-km">~14 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">June recovery week</div>
+        <div class="week-sub">Mon 22 Jun – Sun 28 Jun &nbsp;·&nbsp; Pull back &amp; absorb</div>
+      </div>
+      <div class="week-right"><div class="week-km">~14 km</div><div class="week-focus">Recovery</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 15 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Very easy. This is intentional recovery — don't push.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 17 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 4 km</div><div class="day-desc">Same. Let the body absorb weeks 1–3.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 20 Jun</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 6 km</div><div class="day-desc">Cutback long run. Easy and comfortable — it should feel almost short.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-22">Mon 22 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 4 km</div>
+            <div class="day-desc">Very easy. This is intentional recovery — don't push.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-24">Wed 24 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 4 km</div>
+            <div class="day-desc">Same. Let the body absorb weeks 1–3.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-27">Sat 27 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 6 km</div>
+            <div class="day-desc">Cutback long run. Easy and comfortable — it should feel almost short.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Recovery weeks are when fitness is actually built. Embrace the lower mileage — it's adaptation, not laziness.</div>
+      <div class="week-tip">Recovery weeks are when fitness is actually built. Embrace the lower mileage — it's adaptation, not laziness.</div>
     </div>
   </div>
 
-  <!-- W5 -->
-  <div class="week type-a">
+  <!-- ═══════════════════════════════════ JULY ═══════════════════════════════════ -->
+
+  <!-- W5 — Jun 29–Jul 5 -->
+  <div class="week type-interval" data-week="5" style="--i:5">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W5</div>
-      <div class="week-info"><div class="week-title">Building continuity</div><div class="week-sub">Jun 22 – 28 &nbsp;·&nbsp; Reducing walk breaks</div></div>
-      <div class="week-km">~20 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Reducing walk breaks</div>
+        <div class="week-sub">Mon 29 Jun – Sun 5 Jul &nbsp;·&nbsp; Building continuity</div>
+      </div>
+      <div class="week-right"><div class="week-km">~20 km</div><div class="week-focus">Intervals</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 22 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Comfortable. Try to run 15 min continuously before any walk break.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 24 Jun</div></div><div class="day-content"><div class="day-badge badge-tempo">Intervals</div><div class="day-name">6 km + 3×5 min pickups</div><div class="day-desc">Warm up 10 min easy, then 3 × 5 min at comfortably hard pace, 2 min easy jog between each.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 27 Jun</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 9 km</div><div class="day-desc">Walk 1 min every 3 km. You're pushing into new territory — take it easy and enjoy it.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-06-29">Mon 29 Jun</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Comfortable. Try to run 15 min continuously before any walk break.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-01">Wed 1 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-interval">Intervals</div>
+            <div class="day-name">5 km — 3 × 5 min pickups</div>
+            <div class="day-desc">One more pickup block than week 3. Keep the same hard effort — don't go faster, go longer.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Pickup</div><div class="wb-step-detail">5 min hard effort</div><div class="wb-step-pace">6'45–7'15" /km</div></div>
+                <div class="wb-step step-rec"><div class="wb-step-num">3</div><div class="wb-step-type">Recovery</div><div class="wb-step-detail">2 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">4</div><div class="wb-step-type">Pickup</div><div class="wb-step-detail">5 min hard effort</div><div class="wb-step-pace">6'45–7'15" /km</div></div>
+                <div class="wb-step step-rec"><div class="wb-step-num">5</div><div class="wb-step-type">Recovery</div><div class="wb-step-detail">2 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">6</div><div class="wb-step-type">Pickup</div><div class="wb-step-detail">5 min hard effort</div><div class="wb-step-pace">6'45–7'15" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">7</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-04">Sat 4 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 10 km</div>
+            <div class="day-desc">Walk 1 min every 3 km. Your first double-digit long run. Take it easy and enjoy it.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Comfortably hard = you can say 3–4 words but not hold a conversation. Not a sprint — sustainable effort.</div>
+      <div class="week-tip">You've now run as far as your only 10K race — but in training, with fresh legs, at your pace. That's progress.</div>
     </div>
   </div>
 
-  <!-- W6 -->
-  <div class="week type-b">
+  <!-- W6 — Jul 6–12 -->
+  <div class="week type-tempo" data-week="6" style="--i:6">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W6</div>
-      <div class="week-info"><div class="week-title">Tempo introduction</div><div class="week-sub">Jun 29 – Jul 5 &nbsp;·&nbsp; First harder efforts</div></div>
-      <div class="week-km">~21 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Tempo introduction</div>
+        <div class="week-sub">Mon 6 Jul – Sun 12 Jul &nbsp;·&nbsp; First harder efforts</div>
+      </div>
+      <div class="week-right"><div class="week-km">~21 km</div><div class="week-focus">Tempo</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 29 Jun</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">True easy pace — should feel almost too slow.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 1 Jul</div></div><div class="day-content"><div class="day-badge badge-tempo">Intervals</div><div class="day-name">6 km — 3×5 min pickups</div><div class="day-desc">Warm up 10 min, then 3 × 5 min at comfortably hard pace, 2 min easy between. Same structure as W5 — go slightly harder.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 4 Jul</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 10 km</div><div class="day-desc">Walk breaks every 3 km. You've run this distance before — it shouldn't feel hard.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-06">Mon 6 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">True easy pace — should feel almost too slow.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-08">Wed 8 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-tempo">Tempo</div>
+            <div class="day-name">5 km — 2 × 8 min tempo</div>
+            <div class="day-desc">Your first true tempo blocks — longer and more sustained than pickups. Breathable but uncomfortable.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">8 min comfortably hard</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-rec"><div class="wb-step-num">3</div><div class="wb-step-type">Recovery</div><div class="wb-step-detail">3 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">4</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">8 min comfortably hard</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">5</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-11">Sat 11 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 11 km</div>
+            <div class="day-desc">Walk breaks every 3 km. Steady and relaxed.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">You're now running farther in training than most people ever do. That's genuinely worth acknowledging.</div>
+      <div class="week-tip">Tempo pace = 3–4 words max. Not a sprint, not a jog. A sustained discomfort you can control.</div>
     </div>
   </div>
 
-  <!-- W7 -->
-  <div class="week type-c">
+  <!-- W7 — Jul 13–19 -->
+  <div class="week type-tempo" data-week="7" style="--i:7">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W7</div>
-      <div class="week-info"><div class="week-title">Pushing longer</div><div class="week-sub">Jul 6 – 12 &nbsp;·&nbsp; Building distance</div></div>
-      <div class="week-km">~22 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Longer hard blocks</div>
+        <div class="week-sub">Mon 13 Jul – Sun 19 Jul &nbsp;·&nbsp; Building distance</div>
+      </div>
+      <div class="week-right"><div class="week-km">~23 km</div><div class="week-focus">Tempo</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 6 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Easy and comfortable.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 8 Jul</div></div><div class="day-content"><div class="day-badge badge-tempo">Intervals</div><div class="day-name">6 km — 3×8 min pickups</div><div class="day-desc">Longer pickup blocks. Warm up 10 min, then 3 × 8 min hard, 2 min easy jog between each.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 11 Jul</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 11 km</div><div class="day-desc">Walk 1 min every 3 km. Steady, relaxed, proud.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-13">Mon 13 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 6 km</div>
+            <div class="day-desc">Easy and comfortable. First 6 km easy run.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-15">Wed 15 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-tempo">Tempo</div>
+            <div class="day-name">6 km — 3 × 8 min tempo</div>
+            <div class="day-desc">Three tempo blocks now. You'll feel it. That's it doing its job.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">8 min comfortably hard</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-rec"><div class="wb-step-num">3</div><div class="wb-step-type">Recovery</div><div class="wb-step-detail">2 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">4</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">8 min comfortably hard</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-rec"><div class="wb-step-num">5</div><div class="wb-step-type">Recovery</div><div class="wb-step-detail">2 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">6</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">8 min comfortably hard</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">7</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-18">Sat 18 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 13 km</div>
+            <div class="day-desc">Walk 1 min every 3 km. Over halfway to 21.1 km in one run. Celebrate quietly after.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">3×8 min is a proper interval session. You'll feel it the next day — that's it working.</div>
+      <div class="week-tip">3×8 min is a serious tempo session. You'll feel it the next day — that soreness is adaptation.</div>
     </div>
   </div>
 
-  <!-- W8 -->
-  <div class="week type-d">
+  <!-- W8 — JULY REST WEEK — Jul 20–26 -->
+  <div class="week type-recovery" data-week="8" style="--i:8">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W8</div>
-      <div class="week-info"><div class="week-title">Recovery week</div><div class="week-sub">Jul 13 – 19 &nbsp;·&nbsp; Rest &amp; regenerate</div></div>
-      <div class="week-km">~18 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">July recovery week</div>
+        <div class="week-sub">Mon 20 Jul – Sun 26 Jul &nbsp;·&nbsp; Rest &amp; regenerate</div>
+      </div>
+      <div class="week-right"><div class="week-km">~18 km</div><div class="week-focus">Recovery</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 13 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Very easy. Let the body absorb weeks 5–7.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 15 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Same — no tempo, just easy running.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 18 Jul</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 8 km</div><div class="day-desc">Cutback long run. Should feel almost short after 11 km last week.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-20">Mon 20 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Very easy. Let the body absorb weeks 5–7.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-22">Wed 22 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Same — no tempo, just easy running.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-25">Sat 25 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 8 km</div>
+            <div class="day-desc">Cutback long run. Should feel almost short after 13 km last week.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Second recovery week. Your body is rebuilding stronger. Trust the process — don't add bonus runs.</div>
+      <div class="week-tip">Second recovery week. Your body is rebuilding stronger. Trust the process — don't add bonus runs.</div>
     </div>
   </div>
 
-  <!-- W9 -->
-  <div class="week type-a">
+  <!-- ═══════════════════════════════════ AUGUST ═══════════════════════════════════ -->
+
+  <!-- W9 — Jul 27–Aug 2 -->
+  <div class="week type-tempo" data-week="9" style="--i:9">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W9</div>
-      <div class="week-info"><div class="week-title">Continuous tempo</div><div class="week-sub">Jul 20 – 26 &nbsp;·&nbsp; Longer hard blocks</div></div>
-      <div class="week-km">~26 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Continuous tempo</div>
+        <div class="week-sub">Mon 27 Jul – Sun 2 Aug &nbsp;·&nbsp; Longer hard blocks</div>
+      </div>
+      <div class="week-right"><div class="week-km">~26 km</div><div class="week-focus">Tempo</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 20 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy and conversational.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 22 Jul</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">7 km — 2×10 min tempo</div><div class="day-desc">Warm up 10 min easy, then 2 × 10 min at comfortably hard pace, 3 min easy jog between.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 25 Jul</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 13 km</div><div class="day-desc">Walk 1 min every 4 km. You're well past the halfway mark of a half — this is the new normal.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-27">Mon 27 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 6 km</div>
+            <div class="day-desc">Easy and conversational.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-07-29">Wed 29 Jul</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-tempo">Tempo</div>
+            <div class="day-name">6 km — 2 × 10 min tempo</div>
+            <div class="day-desc">Blocks get longer — 10 min is enough to really feel the effort accumulate. Control the pace, don't surge.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">10 min comfortably hard</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-rec"><div class="wb-step-num">3</div><div class="wb-step-type">Recovery</div><div class="wb-step-detail">3 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">4</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">10 min comfortably hard</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">5</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-01">Sat 1 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 14 km</div>
+            <div class="day-desc">Walk 1 min every 4 km. Fuel at 7 km — gel, banana, dates, whatever you'll use on race day.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Tempo runs train your body to sustain a harder effort. The 10 min blocks are uncomfortable — that discomfort is doing the work.</div>
+      <div class="week-tip">14 km is 2/3 of the half marathon. Use the long run to test race-day fuel — start practising now.</div>
     </div>
   </div>
 
-  <!-- W10 -->
-  <div class="week type-b">
+  <!-- W10 — Aug 3–9 -->
+  <div class="week type-tempo" data-week="10" style="--i:10">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W10</div>
-      <div class="week-info"><div class="week-title">Big week</div><div class="week-sub">Jul 27 – Aug 2 &nbsp;·&nbsp; Longest runs yet</div></div>
-      <div class="week-km">~27 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Peak block I</div>
+        <div class="week-sub">Mon 3 Aug – Sun 9 Aug &nbsp;·&nbsp; Closing in on 16 km</div>
+      </div>
+      <div class="week-right"><div class="week-km">~28 km</div><div class="week-focus">Tempo</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 27 Jul</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy recovery from last Saturday.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 29 Jul</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">7 km — 3×10 min tempo</div><div class="day-desc">Three tempo blocks. Hard but manageable. Each 10 min should feel like a challenge you can finish.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 1 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 14 km</div><div class="day-desc">New longest run. Walk every 4 km. Fuel with something at the 7 km mark — gel, banana, whatever works for you.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-03">Mon 3 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 6 km</div>
+            <div class="day-desc">Easy shake-out from last Saturday.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-05">Wed 5 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-tempo">Tempo</div>
+            <div class="day-name">6 km — 20 min continuous tempo</div>
+            <div class="day-desc">Your first unbroken 20 min tempo. Warm up, hold the pace steadily for 20 min, cool down. Don't go out too fast.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">20 min continuous tempo</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">3</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-08">Sat 8 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 16 km</div>
+            <div class="day-desc">Walk 1 min every 4 km. Fuel at 8 km. Over 75% of the half done in one session.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">14 km is 2/3 of the half marathon distance. You're earning this, mile by mile.</div>
+      <div class="week-tip">After 16 km you've run 75% of the race distance in training. Take a photo at the end — you've earned it.</div>
     </div>
   </div>
 
-  <!-- W11 -->
-  <div class="week type-c">
+  <!-- W11 — AUGUST REST WEEK — Aug 10–16 -->
+  <div class="week type-recovery" data-week="11" style="--i:11">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W11</div>
-      <div class="week-info"><div class="week-title">Peak block I</div><div class="week-sub">Aug 3 – 9 &nbsp;·&nbsp; Closing in on 16 km</div></div>
-      <div class="week-km">~30 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">August recovery week</div>
+        <div class="week-sub">Mon 10 Aug – Sun 16 Aug &nbsp;·&nbsp; Third rest block</div>
+      </div>
+      <div class="week-right"><div class="week-km">~22 km</div><div class="week-focus">Recovery</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 3 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy shake-out from the big week.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 5 Aug</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 20 min continuous tempo</div><div class="day-desc">Warm up 10 min easy, then 20 min steady tempo, cool down 10 min. Your longest unbroken tempo block yet.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 8 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 16 km</div><div class="day-desc">Walk 1 min every 4 km. Over 75% of the half done in one session — take a photo at the end.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-10">Mon 10 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Very easy. Absorbing the peak block.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-12">Wed 12 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Relaxed — no tempo effort at all.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-15">Sat 15 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 12 km</div>
+            <div class="day-desc">Comfortable cutback run. Should feel manageable after 16 km.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">After 16 km you're over 75% of the half marathon distance. The hard work is almost done.</div>
+      <div class="week-tip">Third recovery week. The hay is going in the barn. You're stronger than you realise.</div>
     </div>
   </div>
 
-  <!-- W12 -->
-  <div class="week type-d">
+  <!-- ═══════════════════════════════════ SEPTEMBER ═══════════════════════════════════ -->
+
+  <!-- W12 — Aug 17–23 -->
+  <div class="week type-tempo" data-week="12" style="--i:12">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W12</div>
-      <div class="week-info"><div class="week-title">Recovery week</div><div class="week-sub">Aug 10 – 16 &nbsp;·&nbsp; Third rest block</div></div>
-      <div class="week-km">~23 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Race sharpening I</div>
+        <div class="week-sub">Mon 17 Aug – Sun 23 Aug &nbsp;·&nbsp; Fine-tuning fitness</div>
+      </div>
+      <div class="week-right"><div class="week-km">~30 km</div><div class="week-focus">Tempo</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 10 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Very easy. Absorbing the peak block.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 12 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Relaxed — no tempo effort at all.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 15 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 12 km</div><div class="day-desc">Comfortable cutback run. Should feel manageable after 16 km.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-17">Mon 17 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 6 km</div>
+            <div class="day-desc">Easy and fresh after the recovery week.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-19">Wed 19 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-tempo">Tempo</div>
+            <div class="day-name">7 km — 25 min tempo</div>
+            <div class="day-desc">Warm up, 25 min solid tempo, cool down. Strong and controlled. This is close to what race effort feels like.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">25 min continuous tempo</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">3</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-22">Sat 22 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 17 km</div>
+            <div class="day-desc">New longest run. Walk 1 min every 4 km. Fuel at 8–9 km. Take it slow and steady.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Third recovery week. The hay is going in the barn. You're stronger than you realise.</div>
+      <div class="week-tip">17 km is 80% of the half marathon. After this run, race day is within reach — you can see the finish line from here.</div>
     </div>
   </div>
 
-  <!-- W13 -->
-  <div class="week type-a">
+  <!-- W13 — Aug 24–30 -->
+  <div class="week type-tempo" data-week="13" style="--i:13">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W13</div>
-      <div class="week-info"><div class="week-title">Race sharpening</div><div class="week-sub">Aug 17 – 23 &nbsp;·&nbsp; Fine-tuning fitness</div></div>
-      <div class="week-km">~31 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Peak block II</div>
+        <div class="week-sub">Mon 24 Aug – Sun 30 Aug &nbsp;·&nbsp; Longest training runs</div>
+      </div>
+      <div class="week-right"><div class="week-km">~31 km</div><div class="week-focus">Tempo</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 17 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy and fresh.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 19 Aug</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 25 min tempo</div><div class="day-desc">Warm up 10 min, 25 min at comfortably hard, cool down. Strong and controlled.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 22 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 17 km</div><div class="day-desc">New longest run. Walk 1 min every 4 km. Fuel at 8–9 km. Take it slow and steady.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-24">Mon 24 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 6 km</div>
+            <div class="day-desc">Easy recovery.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-26">Wed 26 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-tempo">Tempo</div>
+            <div class="day-name">7 km — 30 min tempo</div>
+            <div class="day-desc">Your longest tempo block. Warm up 10 min, 30 min at race effort, cool down. If you go out right, the last 10 min will be hard but finishable.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">30 min continuous tempo</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">3</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-29">Sat 29 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 18 km</div>
+            <div class="day-desc">Walk 1 min every 4 km. Fuel at 9 km. This is the second biggest run of the entire plan.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">This is your last fully hard block before taper. Everything from W17 is about arriving fresh to the start line.</div>
+      <div class="week-tip">18 km is 85% of the half. At this point, race day genuinely is a victory lap with a medal at the end.</div>
     </div>
   </div>
 
-  <!-- W14 -->
-  <div class="week type-b">
+  <!-- W14 — SEPTEMBER REST WEEK — Aug 31–Sep 6 -->
+  <div class="week type-recovery" data-week="14" style="--i:14">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W14</div>
-      <div class="week-info"><div class="week-title">Peak block II</div><div class="week-sub">Aug 24 – 30 &nbsp;·&nbsp; Longest training runs</div></div>
-      <div class="week-km">~32 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">September recovery week</div>
+        <div class="week-sub">Mon 31 Aug – Sun 6 Sep &nbsp;·&nbsp; Final big rest</div>
+      </div>
+      <div class="week-right"><div class="week-km">~23 km</div><div class="week-focus">Recovery</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 24 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy recovery.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 26 Aug</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 30 min tempo</div><div class="day-desc">Your longest tempo block. Warm up 10 min, 30 min at race effort, cool down.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 29 Aug</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 18 km</div><div class="day-desc">Walk 1 min every 4 km. Fuel at 9 km. This is the second biggest run of the whole plan.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-08-31">Mon 31 Aug</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Very easy. Absorbing peak block II.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-09-02">Wed 2 Sep</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 6 km</div>
+            <div class="day-desc">Relaxed — no tempo at all.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-09-05">Sat 5 Sep</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Long run — 12 km</div>
+            <div class="day-desc">Comfortable cutback run. Should feel easy after 18 km. Savour how far you've come.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">18 km is 85% of the half marathon. At this point, race day genuinely is a victory lap.</div>
+      <div class="week-tip">Fourth recovery week. The hay is in the barn. You're ready — you're just not fully rested yet.</div>
     </div>
   </div>
 
-  <!-- W15 -->
-  <div class="week type-c">
+  <!-- W15 — Sep 7–13 -->
+  <div class="week type-tempo" data-week="15" style="--i:15">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W15</div>
-      <div class="week-info"><div class="week-title">Peak block III</div><div class="week-sub">Aug 31 – Sep 6 &nbsp;·&nbsp; Near race distance</div></div>
-      <div class="week-km">~33 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Peak block III</div>
+        <div class="week-sub">Mon 7 Sep – Sun 13 Sep &nbsp;·&nbsp; Near race distance</div>
+      </div>
+      <div class="week-right"><div class="week-km">~31 km</div><div class="week-focus">Tempo</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 31 Aug</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy shake-out.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 2 Sep</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 30 min tempo</div><div class="day-desc">Same as W14. You know this now — just execute.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 5 Sep</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">&#127942; Long run — 19 km</div><div class="day-desc">Your longest-ever run. Walk 1 min every 4 km. Take it slow — finishing is everything. Fuel at 9 km. Celebrate after.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-09-07">Mon 7 Sep</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 6 km</div>
+            <div class="day-desc">Easy shake-out. Legs feel good after recovery week — enjoy it.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-09-09">Wed 9 Sep</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-tempo">Tempo</div>
+            <div class="day-name">7 km — 25 min tempo</div>
+            <div class="day-desc">Same as W12. You know this structure now — just execute. Aim to finish feeling like you could have done 5 more min.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Warm-up</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Tempo</div><div class="wb-step-detail">25 min continuous tempo</div><div class="wb-step-pace">7'15–7'45" /km</div></div>
+                <div class="wb-step step-cool"><div class="wb-step-num">3</div><div class="wb-step-type">Cool-down</div><div class="wb-step-detail">10 min easy jog</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-09-12">Sat 12 Sep</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">🏆 Long run — 19 km</div>
+            <div class="day-desc">Your longest-ever run. Walk 1 min every 4 km. Take it slow — finishing is everything. Fuel at 9 km. Celebrate after.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">After 19 km, you've proven you can finish a half marathon. The last 2.1 km on race day is pure adrenaline and crowd energy.</div>
+      <div class="week-tip">After 19 km, you've already proven you can finish a half marathon. The last 2.1 km on race day is pure adrenaline and crowd energy.</div>
     </div>
   </div>
 
-  <!-- W16 -->
-  <div class="week type-d">
+  <!-- W16 — Sep 14–20 TAPER -->
+  <div class="week type-recovery" data-week="16" style="--i:16">
     <div class="week-header" onclick="toggleWeek(this)">
       <div class="week-num">W16</div>
-      <div class="week-info"><div class="week-title">Recovery week</div><div class="week-sub">Sep 7 – 13 &nbsp;·&nbsp; Final big rest</div></div>
-      <div class="week-km">~25 km</div><div class="week-arrow">▶</div>
+      <div class="week-info">
+        <div class="week-title">Taper week</div>
+        <div class="week-sub">Mon 14 Sep – Sun 20 Sep &nbsp;·&nbsp; Freshen the legs</div>
+      </div>
+      <div class="week-right"><div class="week-km">~20 km</div><div class="week-focus">Taper</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 7 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Very easy. Absorbing peak block III.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 9 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Relaxed — no tempo at all.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 12 Sep</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 14 km</div><div class="day-desc">Comfortable cutback run. Should feel easy after 19 km. Savour how far you've come.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-09-14">Mon 14 Sep</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Easy. Legs should feel fresh — that's the taper working.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-09-16">Wed 16 Sep</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Relaxed. No pressure whatsoever.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-09-19">Sat 19 Sep</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-long">Long Run</div>
+            <div class="day-name">Easy 10 km</div>
+            <div class="day-desc">Comfortable taper run. Savour how easy 10 km feels now — that's 15 weeks of work paying off.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'00–9'45" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Fourth recovery week. The hay is in the barn. You're ready — you're just not fully rested yet.</div>
+      <div class="week-tip">Taper anxiety is real — you'll feel restless and under-trained. Resist the urge to add extra runs. Rest IS the training now.</div>
     </div>
   </div>
 
-  <!-- W17 -->
-  <div class="week type-a">
+  <!-- RACE WEEK — always fixed, never shifts -->
+  <div class="week type-race" data-week="17" data-fixed="true" style="--i:17">
     <div class="week-header" onclick="toggleWeek(this)">
-      <div class="week-num">W17</div>
-      <div class="week-info"><div class="week-title">Race sharpening II</div><div class="week-sub">Sep 14 – 20 &nbsp;·&nbsp; Final hard efforts</div></div>
-      <div class="week-km">~33 km</div><div class="week-arrow">▶</div>
+      <div class="week-num">🏁</div>
+      <div class="week-info">
+        <div class="week-title">Race week — Oct 10</div>
+        <div class="week-sub">The final countdown</div>
+      </div>
+      <div class="week-right"><div class="week-km">~8 km + race</div></div>
+      <div class="week-arrow">▶</div>
     </div>
     <div class="week-body">
       <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 14 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy and fresh.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 16 Sep</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 25 min tempo</div><div class="day-desc">Warm up 10 min, 25 min at comfortably hard, cool down. Precise and controlled.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 19 Sep</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 19 km</div><div class="day-desc">Final 19 km. You know exactly how to pace this now. Walk breaks every 4 km. Fuel at 9 km.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-10-05">Mon 5 Oct</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-easy">Easy Run</div>
+            <div class="day-name">Easy 5 km</div>
+            <div class="day-desc">Last easy run. Short and breezy — enjoy it.</div>
+            <div class="pace-tag"><span class="pt-label">pace</span><span class="pt-val">9'30–10'30" /km</span></div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date" data-base="2026-10-07">Wed 7 Oct</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-shakeout">Shakeout</div>
+            <div class="day-name">3 km + strides</div>
+            <div class="day-desc">3 easy km, then 4 × 20-second strides (quick but relaxed). Wakes up fast-twitch muscles without tiring them.</div>
+            <div class="workout-breakdown">
+              <div class="wb-title">Amazfit workout steps</div>
+              <div class="wb-steps">
+                <div class="wb-step step-warm"><div class="wb-step-num">1</div><div class="wb-step-type">Easy Jog</div><div class="wb-step-detail">3 km easy</div><div class="wb-step-pace">9'30–10'30" /km</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">2</div><div class="wb-step-type">Stride</div><div class="wb-step-detail">20 sec fast, relaxed</div><div class="wb-step-pace">6'00–6'30" /km</div></div>
+                <div class="wb-step step-rec"><div class="wb-step-num">3</div><div class="wb-step-type">Walk</div><div class="wb-step-detail">60 sec walk</div><div class="wb-step-pace">walk</div></div>
+                <div class="wb-step step-work"><div class="wb-step-num">4</div><div class="wb-step-type">Stride</div><div class="wb-step-detail">20 sec fast, relaxed × 3 more</div><div class="wb-step-pace">6'00–6'30" /km</div></div>
+              </div>
+            </div>
+            <div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event,this)">↷ reschedule</button></div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date">Fri 9 Oct</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-rest">Rest</div>
+            <div class="day-name">Full rest — race eve</div>
+            <div class="day-desc">Lay out your kit. Pin your bib. Set two alarms. Eat a normal dinner — nothing new. Sleep early. You're ready.</div>
+          </div>
+        </div>
+
+        <div class="day" onclick="toggleDay(event,this)">
+          <div class="checkbox"><span class="checkmark">✓</span></div>
+          <div class="day-meta"><div class="day-date">Sat 10 Oct</div></div>
+          <div class="day-content">
+            <div class="day-badge badge-race">Race Day</div>
+            <div class="day-name">🏅 21.1 km — the half marathon</div>
+            <div class="day-desc">Start 30 sec/km slower than feels right. Everyone sprints at the gun — let them. Walk breaks every 4 km are fine. Start at 9'00"/km. Pick up only after 15 km if you feel strong. Your only goal is to cross the line.</div>
+            <div class="pace-tag"><span class="pt-label">target</span><span class="pt-val">8'30–9'00" /km &nbsp;≈&nbsp; 3:00–3:10 finish</span></div>
+          </div>
+        </div>
+
       </div>
-      <div class="tip">Two more hard weeks, then taper. You're almost there.</div>
+      <div class="week-tip">Your only goal is to cross the finish line. There is no wrong finishing time. Every finisher is a winner.</div>
     </div>
   </div>
 
-  <!-- W18 -->
-  <div class="week type-b">
-    <div class="week-header" onclick="toggleWeek(this)">
-      <div class="week-num">W18</div>
-      <div class="week-info"><div class="week-title">Final hard week</div><div class="week-sub">Sep 21 – 27 &nbsp;·&nbsp; Dress rehearsal</div></div>
-      <div class="week-km">~35 km</div><div class="week-arrow">▶</div>
-    </div>
-    <div class="week-body">
-      <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 21 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 6 km</div><div class="day-desc">Easy.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 23 Sep</div></div><div class="day-content"><div class="day-badge badge-tempo">Tempo</div><div class="day-name">8 km — 20 min tempo</div><div class="day-desc">Slightly shorter than last week — this is sharpening, not building. Warm up 10 min, 20 min tempo, cool down.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 26 Sep</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Long run — 21 km</div><div class="day-desc">Full race distance in training. Same gear, same fuel, same start time if possible. Walk breaks every 4 km. This is the dress rehearsal — race day has no unknowns after this.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-      </div>
-      <div class="tip">Running 21 km in training means race day has zero unknowns. You've already done this. Now you just do it with a medal at the end.</div>
-    </div>
-  </div>
-
-  <!-- W19 -->
-  <div class="week type-c">
-    <div class="week-header" onclick="toggleWeek(this)">
-      <div class="week-num">W19</div>
-      <div class="week-info"><div class="week-title">Taper week</div><div class="week-sub">Sep 28 – Oct 4 &nbsp;·&nbsp; Freshen the legs</div></div>
-      <div class="week-km">~20 km</div><div class="week-arrow">▶</div>
-    </div>
-    <div class="week-body">
-      <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 28 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Easy. Legs should feel fresh — that's the taper working.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 30 Sep</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Relaxed. No tempo, no pressure whatsoever.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 3 Oct</div></div><div class="day-content"><div class="day-badge badge-long">Long run</div><div class="day-name">Easy 10 km</div><div class="day-desc">Comfortable taper run. Savour how easy 10 km feels now — that's 19 weeks of work paying off.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-      </div>
-      <div class="tip">Taper anxiety is real — you'll feel restless and under-trained. Resist the urge to add extra runs. Rest IS the training now.</div>
-    </div>
-  </div>
-
-  <!-- W20 RACE WEEK -->
-  <div class="week type-race">
-    <div class="week-header" onclick="toggleWeek(this)">
-      <div class="week-num">&#127937;</div>
-      <div class="week-info"><div class="week-title">Race week — Oct 10</div><div class="week-sub">The final countdown</div></div>
-      <div class="week-km">~8 km + race</div><div class="week-arrow">▶</div>
-    </div>
-    <div class="week-body">
-      <div class="day-list">
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Mon 5 Oct</div></div><div class="day-content"><div class="day-badge badge-run">Run</div><div class="day-name">Easy 5 km</div><div class="day-desc">Last easy run. Short and breezy — enjoy it.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Wed 7 Oct</div></div><div class="day-content"><div class="day-badge badge-warmup">Shakeout</div><div class="day-name">3 km + strides</div><div class="day-desc">3 easy km, then 4 × 20-second strides (quick but relaxed). Wakes up fast-twitch muscles without tiring them.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Fri 9 Oct</div></div><div class="day-content"><div class="day-badge badge-rest">Rest</div><div class="day-name">Full rest — race eve</div><div class="day-desc">Lay out your kit. Pin your bib. Set two alarms. Eat a normal dinner — nothing new. Sleep early.</div><div class="popup-anchor"><button class="reschedule-btn" onclick="openReschedule(event, this)">↷ reschedule</button></div></div></div>
-        <div class="day" onclick="toggleDay(event, this)"><div class="checkbox"><span class="checkmark">✓</span></div><div class="day-meta"><div class="day-date">Sat 10 Oct</div></div><div class="day-content"><div class="day-badge badge-race">Race day</div><div class="day-name">&#127937; 21.1 km — the half marathon</div><div class="day-desc">Start 30 sec/km slower than feels right. Everyone sprints at the gun — let them. Walk breaks every 4 km are fine. Your only goal is to cross the line. Everything else is bonus.</div></div></div>
-      </div>
-      <div class="tip">Your only goal is to cross the finish line. There is no wrong finishing time. Every finisher is a winner.</div>
-    </div>
-  </div>
+  </div><!-- /plan-container -->
 
   <footer>
     <div class="footer-brand">onerunplan</div>
-    <div class="footer-date">Race day: Sat Oct 10, 2026</div>
+    <div class="footer-date">Race day — Sat 10 Oct 2026</div>
   </footer>
 
 </div>
 
 <script>
   var activePopup = null;
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  function formatDate(iso) {
+    var p = iso.split('-');
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    return DAY_NAMES[d.getDay()] + ' ' + +p[2] + ' ' + MONTHS[+p[1]-1];
+  }
+
+  function addDays(iso, n) {
+    var p = iso.split('-');
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    d.setDate(d.getDate() + n);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
 
   function toggleWeek(header) {
     var body = header.nextElementSibling;
@@ -511,79 +1534,181 @@
   function toggleDay(e, el) {
     if (e.target.closest('.reschedule-btn') || e.target.closest('.reschedule-popup')) return;
     el.classList.toggle('checked');
+    saveState(); updateProgress();
+  }
+
+  function buildWeekSelect() {
+    var sel = document.getElementById('rest-week-select');
+    while (sel.options.length > 1) sel.remove(1);
+    var weeks = document.querySelectorAll('#plan-container .week[data-week]');
+    weeks.forEach(function(w) {
+      var wn = w.getAttribute('data-week');
+      var titleEl = w.querySelector('.week-title');
+      var title = titleEl ? titleEl.textContent : 'Week ' + wn;
+      var opt = document.createElement('option');
+      opt.value = wn;
+      opt.textContent = 'W' + wn + ' — ' + title;
+      sel.appendChild(opt);
+    });
+  }
+
+  function insertRestWeek() {
+    var sel = document.getElementById('rest-week-select');
+    var afterWeek = parseInt(sel.value);
+    if (!afterWeek) { alert('Please choose a week to insert the rest block after.'); return; }
+
+    var container = document.getElementById('plan-container');
+    var allWeeks = Array.from(container.querySelectorAll('.week[data-week]'));
+    var afterEl = null;
+    allWeeks.forEach(function(w) {
+      if (parseInt(w.getAttribute('data-week')) === afterWeek) afterEl = w;
+    });
+    if (!afterEl) return;
+
+    var lastDateEls = afterEl.querySelectorAll('.day-date[data-base]');
+    var lastBase = lastDateEls.length ? lastDateEls[lastDateEls.length-1].getAttribute('data-base') : null;
+    var restStart = '—';
+    if (lastBase) {
+      var next = addDays(lastBase, 1);
+      var p = next.split('-');
+      var d = new Date(+p[0], +p[1]-1, +p[2]);
+      var toMon = d.getDay() === 1 ? 0 : (8 - d.getDay()) % 7;
+      d.setDate(d.getDate() + toMon);
+      restStart = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    var restEnd = restStart !== '—' ? addDays(restStart, 6) : '—';
+    var restLabel = restStart !== '—' ? formatDate(restStart) + ' – ' + formatDate(restEnd) : '1 week';
+
+    var restDiv = document.createElement('div');
+    restDiv.className = 'week type-downtime';
+    restDiv.setAttribute('data-rest-block', 'true');
+    restDiv.innerHTML =
+      '<div class="week-header" onclick="toggleDowntime(this)">' +
+        '<div class="week-num">⏸</div>' +
+        '<div class="week-info">' +
+          '<div class="week-title">MNRF / TCA rest week</div>' +
+          '<div class="week-sub">' + restLabel + ' &nbsp;·&nbsp; Down week</div>' +
+        '</div>' +
+        '<div class="week-km">rest</div>' +
+        '<div class="week-arrow">▶</div>' +
+      '</div>' +
+      '<div class="downtime-body" style="display:none">' +
+        '<p>Full rest week — no running. Let your body recover from the treatment cycle. All workouts from the next week onwards have been shifted forward by 7 days. Race day stays fixed on Oct 10.</p>' +
+        '<button class="downtime-remove" onclick="removeRestWeek(this)">✕ Remove this rest block</button>' +
+      '</div>';
+
+    afterEl.insertAdjacentElement('afterend', restDiv);
+    shiftDatesAfter(restDiv, 7);
+    buildWeekSelect();
     saveState();
     updateProgress();
+  }
+
+  function toggleDowntime(header) {
+    var body = header.nextElementSibling;
+    var arrow = header.querySelector('.week-arrow');
+    var isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    arrow.classList.toggle('open', !isOpen);
+  }
+
+  function removeRestWeek(btn) {
+    var restDiv = btn.closest('.week[data-rest-block]');
+    if (!restDiv) return;
+    shiftDatesAfter(restDiv, -7);
+    restDiv.parentNode.removeChild(restDiv);
+    buildWeekSelect();
+    saveState();
+    updateProgress();
+  }
+
+  function shiftDatesAfter(pivotEl, days) {
+    var container = document.getElementById('plan-container');
+    var allEls = Array.from(container.children);
+    var pivotIdx = allEls.indexOf(pivotEl);
+    for (var i = pivotIdx + 1; i < allEls.length; i++) {
+      var el = allEls[i];
+      // Never touch the race week — its dates are fixed to the actual race
+      if (el.hasAttribute('data-fixed')) continue;
+      el.querySelectorAll('.day-date[data-base]').forEach(function(de) {
+        var newBase = addDays(de.getAttribute('data-base'), days);
+        de.setAttribute('data-base', newBase);
+        var dayRow = de.closest('.day');
+        if (!dayRow || !dayRow.classList.contains('rescheduled')) {
+          de.textContent = formatDate(newBase);
+        }
+      });
+      var weekSub = el.querySelector('.week-sub');
+      if (weekSub && !el.hasAttribute('data-rest-block')) {
+        var dates = el.querySelectorAll('.day-date[data-base]');
+        if (dates.length >= 1) {
+          var fp = dates[0].getAttribute('data-base').split('-');
+          var lp = dates[dates.length-1].getAttribute('data-base').split('-');
+          var fd = new Date(+fp[0], +fp[1]-1, +fp[2]);
+          var ld = new Date(+lp[0], +lp[1]-1, +lp[2]);
+          // Calculate Mon–Sun bounds from the first session date
+          var monDate = new Date(fd);
+          var dow = fd.getDay(); // 0=Sun
+          var toMon = dow === 1 ? 0 : dow === 0 ? -6 : 1 - dow;
+          monDate.setDate(fd.getDate() + toMon);
+          var sunDate = new Date(monDate);
+          sunDate.setDate(monDate.getDate() + 6);
+          var parts = weekSub.textContent.split('·');
+          var suffix = parts.length > 1 ? ' ·' + parts.slice(1).join('·') : '';
+          weekSub.textContent =
+            'Mon ' + monDate.getDate() + ' ' + MONTHS[monDate.getMonth()] +
+            ' – Sun ' + sunDate.getDate() + ' ' + MONTHS[sunDate.getMonth()] + suffix;
+        }
+      }
+    }
   }
 
   function openReschedule(e, btn) {
     e.stopPropagation();
     closePopup();
-
     var day = btn.closest('.day');
     var nameEl = day.querySelector('.day-name');
     var anchor = btn.closest('.popup-anchor');
-
     var popup = document.createElement('div');
     popup.className = 'reschedule-popup';
-
     var hasReschedule = day.classList.contains('rescheduled');
     var currentVal = day.dataset.rescheduledDate || '';
-
     popup.innerHTML =
-      '<div class="rp-label">Move <strong>' + nameEl.textContent.replace(/[<>]/g, '') + '</strong> to a new date:</div>' +
+      '<div class="rp-label">Move <strong>' + (nameEl ? nameEl.textContent.replace(/[🏆🏅]/g,'').trim() : '') + '</strong> to:</div>' +
       '<input type="date" id="rp-date" value="' + currentVal + '" />' +
       '<div class="rp-actions">' +
         '<button class="rp-confirm" onclick="applyReschedule()">Confirm</button>' +
         '<button onclick="closePopup()">Cancel</button>' +
-        (hasReschedule ? '<button class="rp-reset" onclick="clearReschedule()">Reset date</button>' : '') +
+        (hasReschedule ? '<button class="rp-reset" onclick="clearReschedule()">Reset</button>' : '') +
       '</div>';
-
     anchor.appendChild(popup);
-    activePopup = { popup: popup, day: day, anchor: anchor };
-
-    var input = popup.querySelector('#rp-date');
-    setTimeout(function() { input.focus(); }, 50);
+    activePopup = { popup: popup, day: day };
+    setTimeout(function() { popup.querySelector('#rp-date').focus(); }, 50);
   }
 
   function applyReschedule() {
     if (!activePopup) return;
-    var popup = activePopup.popup;
-    var day = activePopup.day;
+    var popup = activePopup.popup, day = activePopup.day;
     var val = popup.querySelector('#rp-date').value;
-
     if (!val) { closePopup(); return; }
-
-    var parts = val.split('-');
-    var y = parseInt(parts[0]), m = parseInt(parts[1]), d = parseInt(parts[2]);
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    var date = new Date(y, m - 1, d);
-    var label = dayNames[date.getDay()] + ' ' + d + ' ' + months[m - 1];
-
-    if (!day.dataset.originalDate) {
-      day.dataset.originalDate = day.querySelector('.day-date').textContent;
-    }
+    if (!day.dataset.originalDate) day.dataset.originalDate = day.querySelector('.day-date').textContent;
     day.dataset.rescheduledDate = val;
-    day.querySelector('.day-date').textContent = label + ' ↷';
+    day.querySelector('.day-date').textContent = formatDate(val) + ' ↷';
     day.classList.add('rescheduled');
     day.classList.remove('checked');
-
-    saveState();
-    updateProgress();
-    closePopup();
+    saveState(); updateProgress(); closePopup();
   }
 
   function clearReschedule() {
     if (!activePopup) return;
     var day = activePopup.day;
-    if (day.dataset.originalDate) {
-      day.querySelector('.day-date').textContent = day.dataset.originalDate;
-    }
+    var dateEl = day.querySelector('.day-date');
+    var base = dateEl.getAttribute('data-base');
+    dateEl.textContent = base ? formatDate(base) : (day.dataset.originalDate || '');
     delete day.dataset.rescheduledDate;
     delete day.dataset.originalDate;
     day.classList.remove('rescheduled');
-    saveState();
-    closePopup();
+    saveState(); closePopup();
   }
 
   function closePopup() {
@@ -594,14 +1719,12 @@
   }
 
   document.addEventListener('click', function(e) {
-    if (activePopup && !activePopup.popup.contains(e.target) && !e.target.classList.contains('reschedule-btn')) {
-      closePopup();
-    }
+    if (activePopup && !activePopup.popup.contains(e.target) && !e.target.classList.contains('reschedule-btn')) closePopup();
   });
 
   function updateProgress() {
-    var all = document.querySelectorAll('.day');
-    var done = document.querySelectorAll('.day.checked');
+    var all = document.querySelectorAll('#plan-container .day');
+    var done = document.querySelectorAll('#plan-container .day.checked');
     var total = all.length;
     var pct = total ? Math.round((done.length / total) * 100) : 0;
     document.getElementById('progress-fill').style.width = pct + '%';
@@ -610,43 +1733,92 @@
   }
 
   function saveState() {
-    var days = document.querySelectorAll('.day');
-    var state = Array.prototype.map.call(days, function(d) {
+    var days = document.querySelectorAll('#plan-container .day');
+    var dayState = Array.prototype.map.call(days, function(d) {
+      var de = d.querySelector('.day-date[data-base]');
       return {
         checked: d.classList.contains('checked'),
         rescheduled: d.classList.contains('rescheduled'),
         rescheduledDate: d.dataset.rescheduledDate || null,
-        originalDate: d.dataset.originalDate || null
+        originalDate: d.dataset.originalDate || null,
+        base: de ? de.getAttribute('data-base') : null
       };
     });
-    try { localStorage.setItem('onerunplan-oct-state', JSON.stringify(state)); } catch(e) {}
+    var restBlocks = [];
+    var children = Array.from(document.getElementById('plan-container').children);
+    children.forEach(function(el, idx) {
+      if (el.hasAttribute('data-rest-block')) {
+        var prev = null;
+        for (var i = idx - 1; i >= 0; i--) {
+          if (children[i].hasAttribute('data-week')) { prev = children[i].getAttribute('data-week'); break; }
+        }
+        var subEl = el.querySelector('.week-sub');
+        restBlocks.push({ afterWeek: prev, label: subEl ? subEl.textContent : '' });
+      }
+    });
+    try {
+      localStorage.setItem('onerunplan-v3-days', JSON.stringify(dayState));
+      localStorage.setItem('onerunplan-v3-rest', JSON.stringify(restBlocks));
+    } catch(e) {}
   }
 
   function loadState() {
     try {
-      var raw = localStorage.getItem('onerunplan-oct-state');
-      if (!raw) return;
-      var state = JSON.parse(raw);
-      var days = document.querySelectorAll('.day');
-      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      days.forEach(function(d, i) {
-        if (!state[i]) return;
-        if (state[i].checked) d.classList.add('checked');
-        if (state[i].rescheduled && state[i].rescheduledDate) {
-          d.classList.add('rescheduled');
-          d.dataset.rescheduledDate = state[i].rescheduledDate;
-          d.dataset.originalDate = state[i].originalDate || d.querySelector('.day-date').textContent;
-          var parts = state[i].rescheduledDate.split('-');
-          var y = parseInt(parts[0]), m = parseInt(parts[1]), dd = parseInt(parts[2]);
-          var date = new Date(y, m - 1, dd);
-          d.querySelector('.day-date').textContent = dayNames[date.getDay()] + ' ' + dd + ' ' + months[m - 1] + ' ↷';
-        }
-      });
+      var rawRest = localStorage.getItem('onerunplan-v3-rest');
+      if (rawRest) {
+        JSON.parse(rawRest).forEach(function(rb) {
+          if (!rb.afterWeek) return;
+          var afterEl = document.querySelector('#plan-container .week[data-week="' + rb.afterWeek + '"]');
+          if (!afterEl) return;
+          var restDiv = document.createElement('div');
+          restDiv.className = 'week type-downtime';
+          restDiv.setAttribute('data-rest-block', 'true');
+          restDiv.innerHTML =
+            '<div class="week-header" onclick="toggleDowntime(this)">' +
+              '<div class="week-num">⏸</div>' +
+              '<div class="week-info"><div class="week-title">MNRF / TCA rest week</div>' +
+              '<div class="week-sub">' + (rb.label || 'Rest week') + '</div></div>' +
+              '<div class="week-km">rest</div><div class="week-arrow">▶</div>' +
+            '</div>' +
+            '<div class="downtime-body" style="display:none">' +
+              '<p>Full rest week — no running. Let your body recover from the treatment cycle.</p>' +
+              '<button class="downtime-remove" onclick="removeRestWeek(this)">✕ Remove this rest block</button>' +
+            '</div>';
+          afterEl.insertAdjacentElement('afterend', restDiv);
+          shiftDatesAfter(restDiv, 7);
+        });
+      }
+      var rawDays = localStorage.getItem('onerunplan-v3-days');
+      if (rawDays) {
+        var dayState = JSON.parse(rawDays);
+        var days = document.querySelectorAll('#plan-container .day');
+        days.forEach(function(d, i) {
+          if (!dayState[i]) return;
+          if (dayState[i].checked) d.classList.add('checked');
+          if (dayState[i].rescheduled && dayState[i].rescheduledDate) {
+            d.classList.add('rescheduled');
+            d.dataset.rescheduledDate = dayState[i].rescheduledDate;
+            d.dataset.originalDate = dayState[i].originalDate || '';
+            d.querySelector('.day-date').textContent = formatDate(dayState[i].rescheduledDate) + ' ↷';
+          }
+        });
+      }
     } catch(e) {}
   }
 
+  window.toggleWeek = toggleWeek;
+  window.toggleDay = toggleDay;
+  window.insertRestWeek = insertRestWeek;
+  window.toggleDowntime = toggleDowntime;
+  window.removeRestWeek = removeRestWeek;
+  window.openReschedule = openReschedule;
+  window.applyReschedule = applyReschedule;
+  window.clearReschedule = clearReschedule;
+  window.closePopup = closePopup;
+
+  buildWeekSelect();
   loadState();
+  buildWeekSelect();
   updateProgress();
 </script>
 </body>
