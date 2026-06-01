@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>halfmarathon — Run dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='80' font-size='80' text-anchor='middle'%3E🍑%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F7F4EE;
+      --paper: #FDFAF5;
+      --ink: #1C1A17;
+      --ink2: #4A4640;
+      --ink3: #8A8278;
+      --line: #E0DBD0;
+      --accent: #B84030;
+      --green: #2A5C42;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      font-size: 13px;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .page { max-width: 720px; margin: 0 auto; padding: 0 24px 100px; position: relative; z-index: 1; }
+
+    header {
+      padding: 72px 0 52px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 48px;
+    }
+    .site-nav {
+      margin-bottom: 28px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      position: relative; z-index: 2;
+    }
+    .site-nav-brand {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .site-nav .logo-link {
+      color: var(--ink3); text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .site-nav .logo-link::before { content: ''; display: block; width: 24px; height: 1px; background: var(--ink3); }
+    .site-nav .logo-link:hover { color: var(--ink); }
+    .btn-nav {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
+      padding: 6px 12px; border-radius: 3px; border: 1px solid var(--line);
+      background: var(--paper); color: var(--ink2); text-decoration: none;
+      white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s;
+      cursor: pointer;
+    }
+    .btn-nav:hover { border-color: var(--ink); color: var(--ink); }
+    .btn-nav.active {
+      background: var(--ink); border-color: var(--ink); color: var(--bg);
+      pointer-events: none;
+    }
+    .btn-nav:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 7vw, 56px);
+      font-weight: 700; line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--ink); margin-bottom: 12px;
+    }
+    .subtitle { font-size: 11px; color: var(--ink3); letter-spacing: 0.06em; line-height: 1.8; }
+
+    .section-label {
+      font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ink3); margin-bottom: 14px; padding-left: 2px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+    .runs-panel {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--paper);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    .runs-panel-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 20px; cursor: pointer; user-select: none;
+      transition: background 0.15s;
+    }
+    .runs-panel-header:hover { background: rgba(0,0,0,0.018); }
+    .runs-panel-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 700; color: var(--ink);
+    }
+    .runs-panel-count { font-size: 10px; color: var(--ink3); flex: 1; }
+    .runs-panel-arrow {
+      font-size: 9px; color: var(--ink3);
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    }
+    .runs-panel-header.open .runs-panel-arrow { transform: rotate(90deg); }
+    .runs-panel-body { display: none; border-top: 1px solid var(--line); }
+    .runs-panel-body.open { display: block; }
+    .runs-panel-toolbar {
+      display: flex; justify-content: flex-end;
+      padding: 12px 20px 0;
+    }
+    .btn-export {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
+      padding: 6px 12px; border-radius: 3px; border: 1px solid var(--green);
+      background: var(--green); color: white; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-export:hover { opacity: 0.85; }
+    .btn-export:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    thead th {
+      text-align: left; padding: 12px 14px;
+      font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--ink3); background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink2);
+      white-space: nowrap;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: rgba(0,0,0,0.02); }
+    tbody td:first-child { color: var(--ink); font-weight: 500; }
+    tbody td:nth-child(2) { white-space: normal; max-width: 200px; }
+
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink3);
+      line-height: 1.7;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .chart-card {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--paper);
+      padding: 16px 18px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+    }
+    .chart-card-title {
+      font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--ink3); margin-bottom: 12px;
+    }
+    .chart-placeholder {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--ink3);
+      letter-spacing: 0.04em;
+      border: 1px dashed var(--line);
+      border-radius: 4px;
+      background: var(--bg);
+    }
+
+    footer {
+      margin-top: 64px; padding-top: 24px;
+      border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px; font-style: italic; font-weight: 400;
+      color: var(--ink3);
+    }
+    .footer-date { font-size: 10px; color: var(--ink3); letter-spacing: 0.06em; }
+
+    @media (max-width: 540px) {
+      .charts-grid { grid-template-columns: 1fr; }
+      .page { padding: 0 16px 60px; }
+      header { padding: 48px 0 36px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <nav class="site-nav">
+      <div class="site-nav-brand">
+        <a class="logo-link" href="index.html">halfmarathon</a>
+        <a href="index.html" class="btn-nav">Plan</a>
+        <a href="dashboard.html" class="btn-nav active" aria-current="page">Dashboard</a>
+      </div>
+    </nav>
+    <h1>Run log</h1>
+    <p class="subtitle">All logged sessions from your training plan</p>
+  </header>
+
+  <div class="runs-panel" id="runs-panel">
+    <div class="runs-panel-header" id="runs-panel-header" onclick="toggleRunsPanel()">
+      <span class="runs-panel-title">Logged runs</span>
+      <span class="runs-panel-count" id="runs-count">0 runs</span>
+      <span class="runs-panel-arrow">▶</span>
+    </div>
+    <div class="runs-panel-body" id="runs-panel-body">
+      <div class="runs-panel-toolbar">
+        <button type="button" class="btn-export" id="btn-export" disabled onclick="exportLogsCsv()">Export CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table id="runs-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Session</th>
+              <th>Distance</th>
+              <th>Duration</th>
+              <th>Pace</th>
+              <th>Avg HR</th>
+              <th>Max HR</th>
+              <th>Cadence</th>
+              <th>RPE</th>
+            </tr>
+          </thead>
+          <tbody id="runs-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-state" hidden>
+        No runs logged yet — check off your first session to get started.
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Trends</div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-card-title">Pace Progression</div>
+      <div class="chart-placeholder">Chart coming soon</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">HR Trend</div>
+      <div class="chart-placeholder">Chart coming soon</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Cadence Trend</div>
+      <div class="chart-placeholder">Chart coming soon</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Weekly Volume</div>
+      <div class="chart-placeholder">Chart coming soon</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-brand">halfmarathon</div>
+    <div class="footer-date">Race day — Sat 10 Oct 2026</div>
+  </footer>
+
+</div>
+
+<script>
+  var LOGS_KEY = 'onerunplan-v3-logs';
+
+  function loadLogs() {
+    try {
+      var raw = localStorage.getItem(LOGS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function getSortedEntries() {
+    var logs = loadLogs();
+    var entries = Object.keys(logs).map(function(key) {
+      return { index: parseInt(key, 10), log: logs[key] };
+    });
+    entries.sort(function(a, b) {
+      var da = a.log.dateIso || '';
+      var db = b.log.dateIso || '';
+      if (da && db && da !== db) return da < db ? -1 : 1;
+      return a.index - b.index;
+    });
+    return entries;
+  }
+
+  function logDurationSec(log) {
+    if (log.durationSec != null) return log.durationSec;
+    if (log.durationMin != null) return Math.round(log.durationMin * 60);
+    return 0;
+  }
+
+  function formatDuration(sec) {
+    if (!sec || sec <= 0) return '—';
+    return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+  }
+
+  function formatPaceFromSec(km, durationSec) {
+    if (!km || km <= 0 || !durationSec || durationSec <= 0) return '—';
+    var secPerKm = Math.round(durationSec / km);
+    return Math.floor(secPerKm / 60) + ':' + String(secPerKm % 60).padStart(2, '0') + '/km';
+  }
+
+  function escapeCsv(val) {
+    var s = val == null ? '' : String(val);
+    if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function toggleRunsPanel() {
+    var header = document.getElementById('runs-panel-header');
+    var body = document.getElementById('runs-panel-body');
+    var isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    header.classList.toggle('open', !isOpen);
+  }
+
+  function exportLogsCsv() {
+    var entries = getSortedEntries();
+    if (!entries.length) return;
+
+    var headers = ['Date', 'Date ISO', 'Session', 'Session Index', 'Distance (km)', 'Duration (mm:ss)', 'Pace (/km)', 'Avg HR', 'Max HR', 'Cadence', 'RPE'];
+    var rows = [headers];
+
+    entries.forEach(function(entry) {
+      var log = entry.log;
+      var durationSec = logDurationSec(log);
+      rows.push([
+        log.dateDisplay || '',
+        log.dateIso || '',
+        log.sessionName || '',
+        entry.index,
+        log.distanceKm,
+        formatDuration(durationSec),
+        formatPaceFromSec(log.distanceKm, durationSec),
+        log.avgHr,
+        log.maxHr,
+        log.cadence,
+        log.rpe
+      ]);
+    });
+
+    var csv = rows.map(function(row) {
+      return row.map(escapeCsv).join(',');
+    }).join('\n');
+
+    var date = new Date().toISOString().slice(0, 10);
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'halfmarathon-runs-' + date + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function renderRuns() {
+    var entries = getSortedEntries();
+    var tbody = document.getElementById('runs-tbody');
+    var empty = document.getElementById('empty-state');
+    var table = document.getElementById('runs-table');
+    var countEl = document.getElementById('runs-count');
+    var exportBtn = document.getElementById('btn-export');
+
+    var n = entries.length;
+    countEl.textContent = n === 1 ? '1 run' : n + ' runs';
+    exportBtn.disabled = n === 0;
+
+    tbody.innerHTML = '';
+    if (!n) {
+      table.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+
+    table.hidden = false;
+    empty.hidden = true;
+
+    entries.forEach(function(entry) {
+      var log = entry.log;
+      var durationSec = logDurationSec(log);
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + (log.dateDisplay || '—') + '</td>' +
+        '<td>' + (log.sessionName || '—') + '</td>' +
+        '<td>' + log.distanceKm + ' km</td>' +
+        '<td>' + formatDuration(durationSec) + '</td>' +
+        '<td>' + formatPaceFromSec(log.distanceKm, durationSec) + '</td>' +
+        '<td>' + log.avgHr + '</td>' +
+        '<td>' + log.maxHr + '</td>' +
+        '<td>' + log.cadence + '</td>' +
+        '<td>' + log.rpe + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  window.toggleRunsPanel = toggleRunsPanel;
+  window.exportLogsCsv = exportLogsCsv;
+
+  renderRuns();
+  window.addEventListener('storage', function(e) {
+    if (e.key === LOGS_KEY) renderRuns();
+  });
+</script>
+</body>
+</html>

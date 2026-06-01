@@ -146,7 +146,10 @@
 
     /* ─── PROGRESS ─── */
     .progress-wrap { margin-bottom: 40px; }
-    .progress-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink3); letter-spacing: 0.05em; margin-bottom: 8px; }
+    .progress-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10px; color: var(--ink3); letter-spacing: 0.05em; margin-bottom: 8px;
+    }
     .progress-track { height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; }
     .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
 
@@ -246,6 +249,89 @@
 
     .day-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
     .day-desc { font-size: 11px; color: var(--ink2); line-height: 1.65; }
+
+    /* ─── SITE NAV ─── */
+    .site-nav {
+      margin-bottom: 20px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      position: relative; z-index: 2;
+    }
+    .site-nav-brand {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .site-nav .logo-link {
+      color: var(--ink3); text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .site-nav .logo-link::before { content: ''; display: block; width: 24px; height: 1px; background: var(--ink3); }
+    .site-nav .logo-link:hover { color: var(--ink); }
+    .btn-nav {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
+      padding: 6px 12px; border-radius: 3px; border: 1px solid var(--line);
+      background: var(--paper); color: var(--ink2); text-decoration: none;
+      white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .btn-nav:hover { border-color: var(--ink); color: var(--ink); }
+    .btn-nav.active {
+      background: var(--ink); border-color: var(--ink); color: var(--bg);
+      pointer-events: none;
+    }
+
+    /* ─── RUN LOG ─── */
+    .day:not(.checked):not(.logging) .run-log { display: none; }
+    .run-log {
+      margin-top: 12px; padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+    .run-log-title {
+      font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--green); margin-bottom: 10px; font-weight: 500;
+    }
+    .run-log-form {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px;
+    }
+    .run-log-field { display: flex; flex-direction: column; gap: 4px; }
+    .run-log-field.full { grid-column: 1 / -1; }
+    .run-log-field label {
+      font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3);
+    }
+    .run-log-field input[type="number"],
+    .run-log-field input[type="text"] {
+      width: 100%; border: 1px solid var(--line); border-radius: 3px;
+      padding: 6px 8px; font-family: 'DM Mono', monospace; font-size: 12px;
+      background: var(--paper); color: var(--ink);
+    }
+    .run-log-pace-val {
+      font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700;
+      color: var(--ink); padding: 4px 0;
+    }
+    .rpe-row { display: flex; flex-wrap: wrap; gap: 4px; }
+    .rpe-btn {
+      width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 3px;
+      background: var(--paper); font-family: 'DM Mono', monospace; font-size: 11px;
+      color: var(--ink2); cursor: pointer; transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .rpe-btn:hover { border-color: var(--green); color: var(--green); }
+    .rpe-btn.selected { background: var(--green); border-color: var(--green); color: white; }
+    .run-log-actions { grid-column: 1 / -1; margin-top: 2px; }
+    .btn-save-log {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
+      padding: 7px 16px; border-radius: 3px; border: none;
+      background: var(--accent); color: white; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-save-log:hover { opacity: 0.85; }
+    .run-log.has-summary:not(.editing) .run-log-form { display: none; }
+    .run-log-summary {
+      font-size: 11px; color: var(--ink2); line-height: 1.5;
+      cursor: pointer; padding: 4px 0;
+    }
+    .run-log-summary:hover { color: var(--ink); }
+    .run-log:not(.has-summary) .run-log-summary { display: none; }
+    .run-log.has-summary.editing .run-log-summary { display: none; }
+
+    @media (max-width: 540px) {
+      .run-log-form { grid-template-columns: 1fr; }
+    }
 
     /* ─── PACE TAG ─── */
     .pace-tag {
@@ -391,7 +477,13 @@
 
   <header>
     <div class="race-badge">Race day<strong>Oct 10, 2026</strong>21.1 km</div>
-    <div class="logo">halfmarathon</div>
+    <nav class="site-nav">
+      <div class="site-nav-brand">
+        <a class="logo-link" href="index.html">halfmarathon</a>
+        <a href="index.html" class="btn-nav active" aria-current="page">Plan</a>
+        <a href="dashboard.html" class="btn-nav">Dashboard</a>
+      </div>
+    </nav>
     <h1>Finish<br>the <em>half.</em></h1>
     <p class="tagline">
       Jun 1 – Oct 10, 2026 &nbsp;·&nbsp; 16 training weeks + race week<br>
@@ -452,7 +544,10 @@
   </div>
 
   <div class="progress-wrap">
-    <div class="progress-meta"><span>Progress</span><span id="progress-label">0 / 0 sessions done</span></div>
+    <div class="progress-meta">
+      <span>Progress</span>
+      <span id="progress-label">0 / 0 sessions done</span>
+    </div>
     <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
   </div>
 
@@ -1532,10 +1627,241 @@
     arrow.classList.toggle('open', !isOpen);
   }
 
+  var LOGS_KEY = 'onerunplan-v3-logs';
+
+  function loadLogs() {
+    try {
+      var raw = localStorage.getItem(LOGS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function persistLogs(logs) {
+    try { localStorage.setItem(LOGS_KEY, JSON.stringify(logs)); } catch (e) {}
+  }
+
+  function saveLog(index, data) {
+    var logs = loadLogs();
+    logs[String(index)] = data;
+    persistLogs(logs);
+  }
+
+  function getSessionIndex(dayEl) {
+    var days = document.querySelectorAll('#plan-container .day');
+    return Array.prototype.indexOf.call(days, dayEl);
+  }
+
+  function logDurationSec(log) {
+    if (!log) return 0;
+    if (log.durationSec != null) return log.durationSec;
+    if (log.durationMin != null) return Math.round(log.durationMin * 60);
+    return 0;
+  }
+
+  function formatDuration(sec) {
+    if (!sec || sec <= 0) return '—';
+    return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+  }
+
+  function parseDuration(str) {
+    if (!str || !String(str).trim()) return null;
+    str = String(str).trim();
+    if (str.indexOf(':') >= 0) {
+      var parts = str.split(':');
+      var m = parseInt(parts[0], 10);
+      var s = parseInt(parts[1] || '0', 10);
+      if (isNaN(m) || isNaN(s) || m < 0 || s < 0 || s >= 60) return null;
+      return m * 60 + s;
+    }
+    var mins = parseInt(str, 10);
+    if (isNaN(mins) || mins < 0) return null;
+    return mins * 60;
+  }
+
+  function formatPaceFromSec(km, durationSec) {
+    if (!km || km <= 0 || !durationSec || durationSec <= 0) return '—';
+    var secPerKm = Math.round(durationSec / km);
+    return Math.floor(secPerKm / 60) + ':' + String(secPerKm % 60).padStart(2, '0') + '/km';
+  }
+
+  function formatSummary(log) {
+    var durationSec = logDurationSec(log);
+    return [
+      log.distanceKm + ' km',
+      formatDuration(durationSec),
+      formatPaceFromSec(log.distanceKm, durationSec),
+      'HR ' + log.avgHr,
+      'RPE ' + log.rpe
+    ].join(' · ');
+  }
+
+  function getDayMeta(dayEl) {
+    var nameEl = dayEl.querySelector('.day-name');
+    var dateEl = dayEl.querySelector('.day-date');
+    var sessionName = nameEl ? nameEl.textContent.replace(/[🏆🏅]/g, '').trim() : '';
+    var dateIso = dayEl.dataset.rescheduledDate || (dateEl && dateEl.getAttribute('data-base')) || null;
+    var dateDisplay = dateEl ? dateEl.textContent.replace(/\s*↷\s*$/, '').trim() : '';
+    return { sessionName: sessionName, dateDisplay: dateDisplay, dateIso: dateIso };
+  }
+
+  function updateRunLogPace(form) {
+    var km = parseFloat(form.querySelector('[name="distanceKm"]').value);
+    var durationSec = parseDuration(form.querySelector('[name="duration"]').value);
+    form.querySelector('.run-log-pace-val').textContent = formatPaceFromSec(km, durationSec);
+  }
+
+  function populateRunLogForm(form, log) {
+    form.querySelector('[name="distanceKm"]').value = log ? log.distanceKm : '';
+    var durationSec = log ? logDurationSec(log) : 0;
+    form.querySelector('[name="duration"]').value = durationSec > 0 ? formatDuration(durationSec) : '';
+    form.querySelector('[name="avgHr"]').value = log ? log.avgHr : '';
+    form.querySelector('[name="maxHr"]').value = log ? log.maxHr : '';
+    form.querySelector('[name="cadence"]').value = log ? log.cadence : '';
+    var rpe = log ? log.rpe : null;
+    form.querySelectorAll('.rpe-btn').forEach(function(btn) {
+      btn.classList.toggle('selected', rpe !== null && parseInt(btn.getAttribute('data-rpe'), 10) === rpe);
+    });
+    form.dataset.rpe = rpe !== null ? String(rpe) : '';
+    updateRunLogPace(form);
+  }
+
+  function updateRunLogUI(dayEl) {
+    var logWrap = dayEl.querySelector('.run-log');
+    if (!logWrap) return;
+    var active = dayEl.classList.contains('checked') || dayEl.classList.contains('logging');
+    if (!active) {
+      logWrap.classList.remove('has-summary', 'editing');
+      return;
+    }
+    var log = loadLogs()[String(getSessionIndex(dayEl))];
+    var showSummary = log && dayEl.classList.contains('checked') && !logWrap.classList.contains('editing');
+    if (showSummary) {
+      logWrap.classList.add('has-summary');
+      logWrap.querySelector('.run-log-summary').textContent = formatSummary(log);
+      populateRunLogForm(logWrap.querySelector('.run-log-form'), log);
+    } else {
+      logWrap.classList.remove('has-summary');
+    }
+  }
+
+  function openRunLog(dayEl) {
+    var logWrap = dayEl.querySelector('.run-log');
+    if (!logWrap) return;
+    dayEl.classList.add('logging');
+    logWrap.classList.add('editing');
+    var log = loadLogs()[String(getSessionIndex(dayEl))];
+    populateRunLogForm(logWrap.querySelector('.run-log-form'), log || null);
+  }
+
+  function initRunLogs() {
+    var rpeButtons = '';
+    for (var i = 1; i <= 10; i++) {
+      rpeButtons += '<button type="button" class="rpe-btn" data-rpe="' + i + '">' + i + '</button>';
+    }
+    var formHtml =
+      '<div class="run-log-title">Log your run</div>' +
+      '<div class="run-log-form">' +
+        '<div class="run-log-field"><label>Distance (km)</label><input type="number" name="distanceKm" min="0" step="0.1" inputmode="decimal" /></div>' +
+        '<div class="run-log-field"><label>Duration (mm:ss)</label><input type="text" name="duration" placeholder="38:30" inputmode="numeric" autocomplete="off" /></div>' +
+        '<div class="run-log-field"><label>Avg Pace</label><div class="run-log-pace-val">—</div></div>' +
+        '<div class="run-log-field"><label>Avg HR (bpm)</label><input type="number" name="avgHr" min="0" step="1" inputmode="numeric" /></div>' +
+        '<div class="run-log-field"><label>Max HR (bpm)</label><input type="number" name="maxHr" min="0" step="1" inputmode="numeric" /></div>' +
+        '<div class="run-log-field"><label>Cadence (spm)</label><input type="number" name="cadence" min="0" step="1" inputmode="numeric" /></div>' +
+        '<div class="run-log-field full"><label>RPE (1–10)</label><div class="rpe-row">' + rpeButtons + '</div></div>' +
+        '<div class="run-log-actions"><button type="button" class="btn-save-log">Save</button></div>' +
+      '</div>' +
+      '<div class="run-log-summary" role="button" tabindex="0"></div>';
+
+    document.querySelectorAll('#plan-container .day').forEach(function(day) {
+      var content = day.querySelector('.day-content');
+      if (!content || content.querySelector('.run-log')) return;
+      var wrap = document.createElement('div');
+      wrap.className = 'run-log';
+      wrap.innerHTML = formHtml;
+      content.appendChild(wrap);
+
+      var form = wrap.querySelector('.run-log-form');
+      var stop = function(e) { e.stopPropagation(); };
+
+      wrap.addEventListener('mousedown', stop);
+      wrap.addEventListener('click', stop);
+      wrap.querySelector('.run-log-summary').addEventListener('click', function(e) {
+        e.stopPropagation();
+        day.classList.add('logging');
+        wrap.classList.add('editing');
+        wrap.classList.remove('has-summary');
+        var log = loadLogs()[String(getSessionIndex(day))];
+        populateRunLogForm(form, log || null);
+      });
+      wrap.querySelector('.run-log-summary').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); wrap.classList.add('editing'); }
+      });
+
+      form.querySelector('[name="distanceKm"]').addEventListener('input', function() { updateRunLogPace(form); });
+      form.querySelector('[name="duration"]').addEventListener('input', function() { updateRunLogPace(form); });
+
+      form.querySelectorAll('.rpe-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          form.querySelectorAll('.rpe-btn').forEach(function(b) { b.classList.remove('selected'); });
+          btn.classList.add('selected');
+          form.dataset.rpe = btn.getAttribute('data-rpe');
+        });
+      });
+
+      form.querySelector('.btn-save-log').addEventListener('click', function(e) {
+        e.stopPropagation();
+        var distanceKm = parseFloat(form.querySelector('[name="distanceKm"]').value);
+        var durationSec = parseDuration(form.querySelector('[name="duration"]').value);
+        var avgHr = parseInt(form.querySelector('[name="avgHr"]').value, 10);
+        var maxHr = parseInt(form.querySelector('[name="maxHr"]').value, 10);
+        var cadence = parseInt(form.querySelector('[name="cadence"]').value, 10);
+        var rpe = parseInt(form.dataset.rpe, 10);
+        if (!distanceKm || distanceKm <= 0 || !durationSec || durationSec <= 0 ||
+            isNaN(avgHr) || isNaN(maxHr) || isNaN(cadence) || isNaN(rpe) || rpe < 1 || rpe > 10) {
+          alert('Please fill in all fields (distance, duration as mm:ss, HR, cadence, and RPE).');
+          return;
+        }
+        var meta = getDayMeta(day);
+        saveLog(getSessionIndex(day), {
+          distanceKm: distanceKm,
+          durationSec: durationSec,
+          avgHr: avgHr,
+          maxHr: maxHr,
+          cadence: cadence,
+          rpe: rpe,
+          sessionName: meta.sessionName,
+          dateDisplay: meta.dateDisplay,
+          dateIso: meta.dateIso,
+          savedAt: new Date().toISOString()
+        });
+        day.classList.add('checked');
+        day.classList.remove('logging');
+        wrap.classList.remove('editing');
+        saveState();
+        updateProgress();
+        updateRunLogUI(day);
+      });
+
+      updateRunLogUI(day);
+    });
+  }
+
   function toggleDay(e, el) {
-    if (e.target.closest('.reschedule-btn') || e.target.closest('.reschedule-popup')) return;
-    el.classList.toggle('checked');
-    saveState(); updateProgress();
+    if (e.target.closest('.reschedule-btn') || e.target.closest('.reschedule-popup') || e.target.closest('.run-log')) return;
+    if (el.classList.contains('checked')) {
+      el.classList.remove('checked');
+      el.classList.remove('logging');
+      var lw = el.querySelector('.run-log');
+      if (lw) lw.classList.remove('editing');
+      saveState();
+      updateProgress();
+      updateRunLogUI(el);
+      return;
+    }
+    if (el.classList.contains('logging')) return;
+    openRunLog(el);
+    updateRunLogUI(el);
   }
 
   function buildWeekSelect() {
@@ -1697,7 +2023,8 @@
     day.querySelector('.day-date').textContent = formatDate(val) + ' ↷';
     day.classList.add('rescheduled');
     day.classList.remove('checked');
-    saveState(); updateProgress(); closePopup();
+    day.classList.remove('logging');
+    saveState(); updateProgress(); updateRunLogUI(day); closePopup();
   }
 
   function clearReschedule() {
@@ -1819,8 +2146,10 @@
 
   buildWeekSelect();
   loadState();
+  initRunLogs();
   buildWeekSelect();
   updateProgress();
+  document.querySelectorAll('#plan-container .day').forEach(updateRunLogUI);
 </script>
 </body>
 </html>
