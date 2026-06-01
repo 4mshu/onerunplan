@@ -278,6 +278,8 @@
 
     /* ─── RUN LOG ─── */
     .day:not(.logging) .run-log { display: none; }
+    .day.logging .run-log,
+    .day .run-log.has-summary { display: block; }
     .run-log {
       margin-top: 12px; padding-top: 12px;
       border-top: 1px solid var(--line);
@@ -426,9 +428,13 @@
       margin-top: 6px; font-family: 'DM Mono', monospace;
       transition: background 0.15s;
     }
-    .reschedule-btn:hover { background: var(--line); color: var(--ink); }
+    .reschedule-btn:hover:not(:disabled) { background: var(--line); color: var(--ink); }
+    .reschedule-btn:disabled {
+      opacity: 0.35; cursor: not-allowed; pointer-events: none;
+    }
     .day:hover .reschedule-btn { display: inline-block; }
     .day.rescheduled .reschedule-btn { display: inline-block; }
+    .day.checked .reschedule-btn { display: inline-block; }
     .day.rescheduled .day-date { color: var(--accent); font-weight: 500; }
     .popup-anchor { position: relative; display: inline-block; }
     .reschedule-popup {
@@ -1749,19 +1755,29 @@
     updateRunLogUI(dayEl);
   }
 
+  function updateRescheduleBtn(dayEl) {
+    var btn = dayEl.querySelector('.reschedule-btn');
+    if (!btn) return;
+    var disabled = hasSavedRun(dayEl);
+    btn.disabled = disabled;
+    btn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+  }
+
   function updateRunLogUI(dayEl) {
     var logWrap = dayEl.querySelector('.run-log');
     if (!logWrap) return;
-    if (!dayEl.classList.contains('logging')) {
+    updateRescheduleBtn(dayEl);
+    var log = loadLogs()[String(getSessionIndex(dayEl))];
+    var saved = hasSavedRun(dayEl);
+    if (!dayEl.classList.contains('logging') && !saved) {
       logWrap.classList.remove('has-summary', 'editing');
       return;
     }
-    var log = loadLogs()[String(getSessionIndex(dayEl))];
     var titleEl = logWrap.querySelector('.run-log-title');
     if (titleEl) {
-      titleEl.textContent = (log && dayEl.classList.contains('checked')) ? 'Saved run' : 'Log your run';
+      titleEl.textContent = saved ? 'Saved run' : 'Log your run';
     }
-    var showSummary = log && dayEl.classList.contains('checked') && !logWrap.classList.contains('editing');
+    var showSummary = saved && !logWrap.classList.contains('editing');
     if (showSummary) {
       logWrap.classList.add('has-summary');
       logWrap.querySelector('.run-log-summary').textContent = formatSummary(log);
@@ -1769,14 +1785,6 @@
     } else {
       logWrap.classList.remove('has-summary');
     }
-  }
-
-  function openRunLogSummary(dayEl) {
-    var logWrap = dayEl.querySelector('.run-log');
-    if (!logWrap) return;
-    dayEl.classList.add('logging');
-    logWrap.classList.remove('editing');
-    updateRunLogUI(dayEl);
   }
 
   function openRunLogEdit(dayEl) {
@@ -1844,6 +1852,7 @@
       wrap.querySelector('.btn-cancel-log').addEventListener('click', function(e) {
         e.stopPropagation();
         if (hasSavedRun(day)) {
+          day.classList.remove('logging');
           wrap.classList.remove('editing');
           updateRunLogUI(day);
         } else {
@@ -1890,7 +1899,7 @@
           savedAt: new Date().toISOString()
         });
         day.classList.add('checked');
-        day.classList.add('logging');
+        day.classList.remove('logging');
         wrap.classList.remove('editing');
         saveState();
         updateProgress();
@@ -1904,10 +1913,9 @@
   function toggleDay(e, el) {
     if (e.target.closest('.reschedule-btn') || e.target.closest('.reschedule-popup') || e.target.closest('.run-log')) return;
     if (hasSavedRun(el)) {
-      if (el.classList.contains('logging')) {
+      var logWrap = el.querySelector('.run-log');
+      if (el.classList.contains('logging') && logWrap && logWrap.classList.contains('editing')) {
         closeRunLog(el);
-      } else {
-        openRunLogSummary(el);
       }
       return;
     }
@@ -2046,8 +2054,10 @@
 
   function openReschedule(e, btn) {
     e.stopPropagation();
+    if (btn.disabled) return;
     closePopup();
     var day = btn.closest('.day');
+    if (hasSavedRun(day)) return;
     var nameEl = day.querySelector('.day-name');
     var anchor = btn.closest('.popup-anchor');
     var popup = document.createElement('div');
