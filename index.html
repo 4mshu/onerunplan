@@ -277,7 +277,7 @@
     }
 
     /* ─── RUN LOG ─── */
-    .day:not(.checked):not(.logging) .run-log { display: none; }
+    .day:not(.logging) .run-log { display: none; }
     .run-log {
       margin-top: 12px; padding-top: 12px;
       border-top: 1px solid var(--line);
@@ -312,22 +312,34 @@
     }
     .rpe-btn:hover { border-color: var(--green); color: var(--green); }
     .rpe-btn.selected { background: var(--green); border-color: var(--green); color: white; }
-    .run-log-actions { grid-column: 1 / -1; margin-top: 2px; }
-    .btn-save-log {
+    .run-log-actions {
+      grid-column: 1 / -1; margin-top: 2px;
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    .btn-save-log, .btn-edit-log, .btn-cancel-log {
       font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
-      padding: 7px 16px; border-radius: 3px; border: none;
-      background: var(--accent); color: white; cursor: pointer;
-      transition: opacity 0.15s;
+      padding: 7px 16px; border-radius: 3px; cursor: pointer;
+      transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .btn-save-log {
+      border: none; background: var(--accent); color: white;
     }
     .btn-save-log:hover { opacity: 0.85; }
+    .btn-edit-log, .btn-cancel-log {
+      border: 1px solid var(--line); background: var(--paper); color: var(--ink2);
+    }
+    .btn-edit-log:hover, .btn-cancel-log:hover { border-color: var(--ink); color: var(--ink); }
     .run-log.has-summary:not(.editing) .run-log-form { display: none; }
+    .run-log-summary-panel { padding: 4px 0; }
     .run-log-summary {
       font-size: 11px; color: var(--ink2); line-height: 1.5;
-      cursor: pointer; padding: 4px 0;
     }
-    .run-log-summary:hover { color: var(--ink); }
-    .run-log:not(.has-summary) .run-log-summary { display: none; }
-    .run-log.has-summary.editing .run-log-summary { display: none; }
+    .run-log-summary-actions { margin-top: 10px; }
+    .run-log:not(.has-summary) .run-log-summary-panel { display: none; }
+    .run-log.has-summary.editing .run-log-summary-panel { display: none; }
+    .run-log.editing .btn-cancel-log { display: inline-block; }
+    .run-log:not(.editing) .btn-cancel-log,
+    .day:not(.checked) .btn-cancel-log { display: none; }
 
     @media (max-width: 540px) {
       .run-log-form { grid-template-columns: 1fr; }
@@ -1725,15 +1737,30 @@
     updateRunLogPace(form);
   }
 
+  function hasSavedRun(dayEl) {
+    var log = loadLogs()[String(getSessionIndex(dayEl))];
+    return !!(log && dayEl.classList.contains('checked'));
+  }
+
+  function closeRunLog(dayEl) {
+    dayEl.classList.remove('logging');
+    var logWrap = dayEl.querySelector('.run-log');
+    if (logWrap) logWrap.classList.remove('editing');
+    updateRunLogUI(dayEl);
+  }
+
   function updateRunLogUI(dayEl) {
     var logWrap = dayEl.querySelector('.run-log');
     if (!logWrap) return;
-    var active = dayEl.classList.contains('checked') || dayEl.classList.contains('logging');
-    if (!active) {
+    if (!dayEl.classList.contains('logging')) {
       logWrap.classList.remove('has-summary', 'editing');
       return;
     }
     var log = loadLogs()[String(getSessionIndex(dayEl))];
+    var titleEl = logWrap.querySelector('.run-log-title');
+    if (titleEl) {
+      titleEl.textContent = (log && dayEl.classList.contains('checked')) ? 'Saved run' : 'Log your run';
+    }
     var showSummary = log && dayEl.classList.contains('checked') && !logWrap.classList.contains('editing');
     if (showSummary) {
       logWrap.classList.add('has-summary');
@@ -1744,6 +1771,24 @@
     }
   }
 
+  function openRunLogSummary(dayEl) {
+    var logWrap = dayEl.querySelector('.run-log');
+    if (!logWrap) return;
+    dayEl.classList.add('logging');
+    logWrap.classList.remove('editing');
+    updateRunLogUI(dayEl);
+  }
+
+  function openRunLogEdit(dayEl) {
+    var logWrap = dayEl.querySelector('.run-log');
+    if (!logWrap) return;
+    dayEl.classList.add('logging');
+    logWrap.classList.add('editing');
+    var log = loadLogs()[String(getSessionIndex(dayEl))];
+    populateRunLogForm(logWrap.querySelector('.run-log-form'), log || null);
+    updateRunLogUI(dayEl);
+  }
+
   function openRunLog(dayEl) {
     var logWrap = dayEl.querySelector('.run-log');
     if (!logWrap) return;
@@ -1751,6 +1796,7 @@
     logWrap.classList.add('editing');
     var log = loadLogs()[String(getSessionIndex(dayEl))];
     populateRunLogForm(logWrap.querySelector('.run-log-form'), log || null);
+    updateRunLogUI(dayEl);
   }
 
   function initRunLogs() {
@@ -1768,9 +1814,15 @@
         '<div class="run-log-field"><label>Max HR (bpm)</label><input type="number" name="maxHr" min="0" step="1" inputmode="numeric" /></div>' +
         '<div class="run-log-field"><label>Cadence (spm)</label><input type="number" name="cadence" min="0" step="1" inputmode="numeric" /></div>' +
         '<div class="run-log-field full"><label>RPE (1–10)</label><div class="rpe-row">' + rpeButtons + '</div></div>' +
-        '<div class="run-log-actions"><button type="button" class="btn-save-log">Save</button></div>' +
+        '<div class="run-log-actions">' +
+          '<button type="button" class="btn-save-log">Save</button>' +
+          '<button type="button" class="btn-cancel-log">Cancel</button>' +
+        '</div>' +
       '</div>' +
-      '<div class="run-log-summary" role="button" tabindex="0"></div>';
+      '<div class="run-log-summary-panel">' +
+        '<div class="run-log-summary"></div>' +
+        '<div class="run-log-summary-actions"><button type="button" class="btn-edit-log">Edit</button></div>' +
+      '</div>';
 
     document.querySelectorAll('#plan-container .day').forEach(function(day) {
       var content = day.querySelector('.day-content');
@@ -1785,16 +1837,18 @@
 
       wrap.addEventListener('mousedown', stop);
       wrap.addEventListener('click', stop);
-      wrap.querySelector('.run-log-summary').addEventListener('click', function(e) {
+      wrap.querySelector('.btn-edit-log').addEventListener('click', function(e) {
         e.stopPropagation();
-        day.classList.add('logging');
-        wrap.classList.add('editing');
-        wrap.classList.remove('has-summary');
-        var log = loadLogs()[String(getSessionIndex(day))];
-        populateRunLogForm(form, log || null);
+        openRunLogEdit(day);
       });
-      wrap.querySelector('.run-log-summary').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); wrap.classList.add('editing'); }
+      wrap.querySelector('.btn-cancel-log').addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (hasSavedRun(day)) {
+          wrap.classList.remove('editing');
+          updateRunLogUI(day);
+        } else {
+          closeRunLog(day);
+        }
       });
 
       form.querySelector('[name="distanceKm"]').addEventListener('input', function() { updateRunLogPace(form); });
@@ -1836,7 +1890,7 @@
           savedAt: new Date().toISOString()
         });
         day.classList.add('checked');
-        day.classList.remove('logging');
+        day.classList.add('logging');
         wrap.classList.remove('editing');
         saveState();
         updateProgress();
@@ -1849,19 +1903,19 @@
 
   function toggleDay(e, el) {
     if (e.target.closest('.reschedule-btn') || e.target.closest('.reschedule-popup') || e.target.closest('.run-log')) return;
-    if (el.classList.contains('checked')) {
-      el.classList.remove('checked');
-      el.classList.remove('logging');
-      var lw = el.querySelector('.run-log');
-      if (lw) lw.classList.remove('editing');
-      saveState();
-      updateProgress();
-      updateRunLogUI(el);
+    if (hasSavedRun(el)) {
+      if (el.classList.contains('logging')) {
+        closeRunLog(el);
+      } else {
+        openRunLogSummary(el);
+      }
       return;
     }
-    if (el.classList.contains('logging')) return;
+    if (el.classList.contains('logging')) {
+      closeRunLog(el);
+      return;
+    }
     openRunLog(el);
-    updateRunLogUI(el);
   }
 
   function buildWeekSelect() {
