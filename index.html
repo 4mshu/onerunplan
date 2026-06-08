@@ -2214,6 +2214,33 @@
   buildWeekSelect();
   updateProgress();
   document.querySelectorAll('#plan-container .day').forEach(updateRunLogUI);
+
+  // Open the week containing the most recently logged run instead of always showing week 1
+  (function() {
+    var logs = loadLogs();
+    var latestIndex = null, latestTime = 0;
+    Object.keys(logs).forEach(function(idx) {
+      var t = logs[idx] && logs[idx].savedAt ? new Date(logs[idx].savedAt).getTime() : 0;
+      if (t > latestTime) { latestTime = t; latestIndex = idx; }
+    });
+    if (latestIndex === null) return;
+
+    var days = document.querySelectorAll('#plan-container .day');
+    var targetDay = days[parseInt(latestIndex, 10)];
+    if (!targetDay) return;
+    var targetWeekBody = targetDay.closest('.week').querySelector('.week-body');
+    if (!targetWeekBody) return;
+
+    // Close all week bodies, then open the target one
+    document.querySelectorAll('#plan-container .week-body').forEach(function(b) {
+      b.classList.remove('open');
+      var arrow = b.previousElementSibling && b.previousElementSibling.querySelector('.week-arrow');
+      if (arrow) arrow.classList.remove('open');
+    });
+    targetWeekBody.classList.add('open');
+    var arrow = targetWeekBody.previousElementSibling && targetWeekBody.previousElementSibling.querySelector('.week-arrow');
+    if (arrow) arrow.classList.add('open');
+  })();
 </script>
 </body>
 </html>
