@@ -7,6 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='80' font-size='80' text-anchor='middle'%3E🍑%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -83,6 +84,30 @@
     }
     .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 
+    /* Stat cards */
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--paper);
+      padding: 16px 18px;
+    }
+    .stat-card-label {
+      font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--ink3); margin-bottom: 10px;
+    }
+    .stat-card-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 700; color: var(--ink);
+      line-height: 1;
+    }
+
+    /* Runs panel */
     .runs-panel {
       border: 1px solid var(--line);
       border-radius: 4px;
@@ -149,6 +174,7 @@
       line-height: 1.7;
     }
 
+    /* Charts */
     .charts-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -159,16 +185,22 @@
       border-radius: 4px;
       background: var(--paper);
       padding: 16px 18px;
-      min-height: 140px;
       display: flex;
       flex-direction: column;
     }
+    .chart-card.full { grid-column: 1 / -1; }
     .chart-card-title {
       font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--ink3); margin-bottom: 12px;
+      color: var(--ink3); margin-bottom: 14px;
     }
-    .chart-placeholder {
+    .chart-canvas-wrap {
+      position: relative;
       flex: 1;
+    }
+    .chart-canvas-wrap.tall { min-height: 190px; }
+    .chart-canvas-wrap.short { min-height: 155px; }
+    .chart-empty {
+      position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
       font-size: 11px; color: var(--ink3);
       letter-spacing: 0.04em;
@@ -190,7 +222,9 @@
     .footer-date { font-size: 10px; color: var(--ink3); letter-spacing: 0.06em; }
 
     @media (max-width: 540px) {
+      .stat-cards { grid-template-columns: repeat(2, 1fr); }
       .charts-grid { grid-template-columns: 1fr; }
+      .chart-card.full { grid-column: auto; }
       .page { padding: 0 16px 60px; }
       header { padding: 48px 0 36px; }
     }
@@ -207,9 +241,29 @@
         <a href="dashboard.html" class="btn-nav active" aria-current="page">Dashboard</a>
       </div>
     </nav>
-    <h1>Run log</h1>
-    <p class="subtitle">All logged sessions from your training plan</p>
+    <h1>Dashboard</h1>
+    <p class="subtitle">Training analytics and run history</p>
   </header>
+
+  <div class="section-label">Summary</div>
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-card-label">Runs logged</div>
+      <div class="stat-card-value" id="stat-runs">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total distance</div>
+      <div class="stat-card-value" id="stat-distance">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total time</div>
+      <div class="stat-card-value" id="stat-time">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Avg pace</div>
+      <div class="stat-card-value" id="stat-pace">—</div>
+    </div>
+  </div>
 
   <div class="runs-panel" id="runs-panel">
     <div class="runs-panel-header" id="runs-panel-header" onclick="toggleRunsPanel()">
@@ -247,21 +301,33 @@
 
   <div class="section-label">Trends</div>
   <div class="charts-grid">
-    <div class="chart-card">
+    <div class="chart-card full">
       <div class="chart-card-title">Pace Progression</div>
-      <div class="chart-placeholder">Chart coming soon</div>
+      <div class="chart-canvas-wrap tall">
+        <canvas id="chart-pace"></canvas>
+        <div class="chart-empty" id="chart-pace-empty">Log your first run to see pace trends</div>
+      </div>
     </div>
     <div class="chart-card">
-      <div class="chart-card-title">HR Trend</div>
-      <div class="chart-placeholder">Chart coming soon</div>
+      <div class="chart-card-title">Heart Rate</div>
+      <div class="chart-canvas-wrap short">
+        <canvas id="chart-hr"></canvas>
+        <div class="chart-empty" id="chart-hr-empty">Log runs with HR to see trends</div>
+      </div>
     </div>
     <div class="chart-card">
-      <div class="chart-card-title">Cadence Trend</div>
-      <div class="chart-placeholder">Chart coming soon</div>
+      <div class="chart-card-title">Cadence</div>
+      <div class="chart-canvas-wrap short">
+        <canvas id="chart-cadence"></canvas>
+        <div class="chart-empty" id="chart-cadence-empty">Log runs with cadence to see trends</div>
+      </div>
     </div>
-    <div class="chart-card">
+    <div class="chart-card full">
       <div class="chart-card-title">Weekly Volume</div>
-      <div class="chart-placeholder">Chart coming soon</div>
+      <div class="chart-canvas-wrap tall">
+        <canvas id="chart-volume"></canvas>
+        <div class="chart-empty" id="chart-volume-empty">Log your first run to see weekly volume</div>
+      </div>
     </div>
   </div>
 
@@ -274,6 +340,7 @@
 
 <script>
   var LOGS_KEY = 'onerunplan-v3-logs';
+  var chartInstances = {};
 
   function loadLogs() {
     try {
@@ -311,6 +378,19 @@
     if (!km || km <= 0 || !durationSec || durationSec <= 0) return '—';
     var secPerKm = Math.round(durationSec / km);
     return Math.floor(secPerKm / 60) + ':' + String(secPerKm % 60).padStart(2, '0') + '/km';
+  }
+
+  function secPerKmToStr(secPerKm) {
+    if (!secPerKm || secPerKm <= 0) return '—';
+    return Math.floor(secPerKm / 60) + ':' + String(Math.round(secPerKm % 60)).padStart(2, '0');
+  }
+
+  function formatTotalTime(sec) {
+    if (!sec || sec <= 0) return '—';
+    var h = Math.floor(sec / 3600);
+    var m = Math.floor((sec % 3600) / 60);
+    if (h > 0) return h + 'h ' + m + 'm';
+    return m + 'm';
   }
 
   function escapeCsv(val) {
@@ -368,8 +448,7 @@
     URL.revokeObjectURL(url);
   }
 
-  function renderRuns() {
-    var entries = getSortedEntries();
+  function renderRuns(entries) {
     var tbody = document.getElementById('runs-tbody');
     var empty = document.getElementById('empty-state');
     var table = document.getElementById('runs-table');
@@ -400,20 +479,316 @@
         '<td>' + log.distanceKm + ' km</td>' +
         '<td>' + formatDuration(durationSec) + '</td>' +
         '<td>' + formatPaceFromSec(log.distanceKm, durationSec) + '</td>' +
-        '<td>' + log.avgHr + '</td>' +
-        '<td>' + log.maxHr + '</td>' +
-        '<td>' + log.cadence + '</td>' +
-        '<td>' + log.rpe + '</td>';
+        '<td>' + (log.avgHr || '—') + '</td>' +
+        '<td>' + (log.maxHr || '—') + '</td>' +
+        '<td>' + (log.cadence || '—') + '</td>' +
+        '<td>' + (log.rpe || '—') + '</td>';
       tbody.appendChild(tr);
     });
+  }
+
+  function renderStats(entries) {
+    var n = entries.length;
+    var totalKm = 0, totalSec = 0;
+    entries.forEach(function(e) {
+      totalKm += (e.log.distanceKm || 0);
+      totalSec += logDurationSec(e.log);
+    });
+
+    document.getElementById('stat-runs').textContent = n || '—';
+    document.getElementById('stat-distance').textContent = n ? totalKm.toFixed(1) + ' km' : '—';
+    document.getElementById('stat-time').textContent = n ? formatTotalTime(totalSec) : '—';
+
+    var avgPaceSec = (totalKm > 0 && totalSec > 0) ? totalSec / totalKm : 0;
+    document.getElementById('stat-pace').textContent = avgPaceSec > 0 ? secPerKmToStr(avgPaceSec) + '/km' : '—';
+  }
+
+  function destroyChart(id) {
+    if (chartInstances[id]) {
+      chartInstances[id].destroy();
+      delete chartInstances[id];
+    }
+  }
+
+  var chartScaleDefaults = {
+    grid: { color: 'rgba(224,219,208,0.8)', drawBorder: false },
+    ticks: { font: { family: 'DM Mono', size: 10 }, color: '#8A8278', maxTicksLimit: 6 },
+    border: { display: false }
+  };
+
+  function makeLineChart(id, labels, datasets, yOverrides) {
+    destroyChart(id);
+    var ctx = document.getElementById(id).getContext('2d');
+    var yAxis = Object.assign({}, chartScaleDefaults, yOverrides || {});
+    chartInstances[id] = new Chart(ctx, {
+      type: 'line',
+      data: { labels: labels, datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            display: datasets.length > 1,
+            labels: {
+              font: { family: 'DM Mono', size: 10 },
+              color: '#4A4640',
+              boxWidth: 10,
+              padding: 12
+            }
+          },
+          tooltip: {
+            backgroundColor: '#FDFAF5',
+            borderColor: '#E0DBD0',
+            borderWidth: 1,
+            titleColor: '#1C1A17',
+            bodyColor: '#4A4640',
+            titleFont: { family: 'DM Mono', size: 11, weight: '500' },
+            bodyFont: { family: 'DM Mono', size: 11 },
+            padding: 10,
+            cornerRadius: 3
+          }
+        },
+        scales: {
+          x: Object.assign({}, chartScaleDefaults, {
+            ticks: Object.assign({}, chartScaleDefaults.ticks, { maxRotation: 30 })
+          }),
+          y: yAxis
+        }
+      }
+    });
+  }
+
+  function renderCharts(entries) {
+    // Pace progression
+    var paceEntries = entries.filter(function(e) {
+      return e.log.distanceKm > 0 && logDurationSec(e.log) > 0;
+    });
+    var paceEmpty = document.getElementById('chart-pace-empty');
+    if (paceEntries.length > 0) {
+      paceEmpty.hidden = true;
+      var paceLabels = paceEntries.map(function(e) { return e.log.dateDisplay || e.log.dateIso || ''; });
+      var paceVals = paceEntries.map(function(e) {
+        return logDurationSec(e.log) / e.log.distanceKm;
+      });
+      makeLineChart('chart-pace', paceLabels, [{
+        label: 'Pace',
+        data: paceVals,
+        borderColor: '#B84030',
+        backgroundColor: 'rgba(184,64,48,0.07)',
+        pointBackgroundColor: '#B84030',
+        pointBorderColor: '#FDFAF5',
+        pointBorderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }], {
+        reverse: true,
+        ticks: {
+          font: { family: 'DM Mono', size: 10 },
+          color: '#8A8278',
+          maxTicksLimit: 6,
+          callback: function(v) { return secPerKmToStr(v) + '/km'; }
+        },
+        grid: { color: 'rgba(224,219,208,0.8)' },
+        border: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return secPerKmToStr(ctx.parsed.y) + '/km'; }
+          }
+        }
+      });
+      // Override tooltip for pace
+      chartInstances['chart-pace'].options.plugins.tooltip.callbacks = {
+        label: function(ctx) { return ' ' + secPerKmToStr(ctx.parsed.y) + '/km'; }
+      };
+      chartInstances['chart-pace'].update('none');
+    } else {
+      paceEmpty.hidden = false;
+      destroyChart('chart-pace');
+    }
+
+    // HR trend
+    var hrEntries = entries.filter(function(e) { return e.log.avgHr > 0; });
+    var hrEmpty = document.getElementById('chart-hr-empty');
+    if (hrEntries.length > 0) {
+      hrEmpty.hidden = true;
+      var hrLabels = hrEntries.map(function(e) { return e.log.dateDisplay || e.log.dateIso || ''; });
+      var hasMaxHr = hrEntries.some(function(e) { return e.log.maxHr > 0; });
+      var hrDatasets = [{
+        label: 'Avg HR',
+        data: hrEntries.map(function(e) { return e.log.avgHr; }),
+        borderColor: '#2A5C42',
+        backgroundColor: 'rgba(42,92,66,0.07)',
+        pointBackgroundColor: '#2A5C42',
+        pointBorderColor: '#FDFAF5',
+        pointBorderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }];
+      if (hasMaxHr) {
+        hrDatasets.push({
+          label: 'Max HR',
+          data: hrEntries.map(function(e) { return e.log.maxHr || null; }),
+          borderColor: '#B84030',
+          backgroundColor: 'transparent',
+          pointBackgroundColor: '#B84030',
+          pointBorderColor: '#FDFAF5',
+          pointBorderWidth: 2,
+          borderDash: [5, 3],
+          tension: 0.3,
+          fill: false,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        });
+      }
+      makeLineChart('chart-hr', hrLabels, hrDatasets, {
+        ticks: {
+          font: { family: 'DM Mono', size: 10 },
+          color: '#8A8278',
+          maxTicksLimit: 6,
+          callback: function(v) { return v + ' bpm'; }
+        },
+        grid: { color: 'rgba(224,219,208,0.8)' },
+        border: { display: false }
+      });
+    } else {
+      hrEmpty.hidden = false;
+      destroyChart('chart-hr');
+    }
+
+    // Cadence trend
+    var cadEntries = entries.filter(function(e) { return e.log.cadence > 0; });
+    var cadEmpty = document.getElementById('chart-cadence-empty');
+    if (cadEntries.length > 0) {
+      cadEmpty.hidden = true;
+      makeLineChart('chart-cadence',
+        cadEntries.map(function(e) { return e.log.dateDisplay || e.log.dateIso || ''; }),
+        [{
+          label: 'Cadence',
+          data: cadEntries.map(function(e) { return e.log.cadence; }),
+          borderColor: '#4A4640',
+          backgroundColor: 'rgba(74,70,64,0.07)',
+          pointBackgroundColor: '#4A4640',
+          pointBorderColor: '#FDFAF5',
+          pointBorderWidth: 2,
+          tension: 0.3,
+          fill: true,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }], {
+          ticks: {
+            font: { family: 'DM Mono', size: 10 },
+            color: '#8A8278',
+            maxTicksLimit: 6,
+            callback: function(v) { return v + ' spm'; }
+          },
+          grid: { color: 'rgba(224,219,208,0.8)' },
+          border: { display: false }
+        }
+      );
+    } else {
+      cadEmpty.hidden = false;
+      destroyChart('chart-cadence');
+    }
+
+    // Weekly volume
+    var weekMap = {};
+    entries.forEach(function(e) {
+      if (!e.log.dateIso || !e.log.distanceKm) return;
+      var d = new Date(e.log.dateIso);
+      var day = d.getDay();
+      var monday = new Date(d);
+      monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+      var key = monday.toISOString().slice(0, 10);
+      if (!weekMap[key]) {
+        weekMap[key] = {
+          label: monday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+          km: 0
+        };
+      }
+      weekMap[key].km += (e.log.distanceKm || 0);
+    });
+    var weekKeys = Object.keys(weekMap).sort();
+    var volEmpty = document.getElementById('chart-volume-empty');
+    if (weekKeys.length > 0) {
+      volEmpty.hidden = true;
+      destroyChart('chart-volume');
+      var ctx = document.getElementById('chart-volume').getContext('2d');
+      chartInstances['chart-volume'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: weekKeys.map(function(k) { return weekMap[k].label; }),
+          datasets: [{
+            label: 'Weekly km',
+            data: weekKeys.map(function(k) { return Math.round(weekMap[k].km * 10) / 10; }),
+            backgroundColor: 'rgba(42,92,66,0.65)',
+            borderColor: '#2A5C42',
+            borderWidth: 1,
+            borderRadius: 3,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#FDFAF5',
+              borderColor: '#E0DBD0',
+              borderWidth: 1,
+              titleColor: '#1C1A17',
+              bodyColor: '#4A4640',
+              titleFont: { family: 'DM Mono', size: 11, weight: '500' },
+              bodyFont: { family: 'DM Mono', size: 11 },
+              padding: 10,
+              cornerRadius: 3,
+              callbacks: {
+                label: function(ctx) { return ' ' + ctx.parsed.y + ' km'; }
+              }
+            }
+          },
+          scales: {
+            x: Object.assign({}, chartScaleDefaults, {
+              ticks: Object.assign({}, chartScaleDefaults.ticks, { maxRotation: 30 })
+            }),
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(224,219,208,0.8)' },
+              border: { display: false },
+              ticks: {
+                font: { family: 'DM Mono', size: 10 },
+                color: '#8A8278',
+                maxTicksLimit: 6,
+                callback: function(v) { return v + ' km'; }
+              }
+            }
+          }
+        }
+      });
+    } else {
+      volEmpty.hidden = false;
+      destroyChart('chart-volume');
+    }
+  }
+
+  function renderDashboard() {
+    var entries = getSortedEntries();
+    renderRuns(entries);
+    renderStats(entries);
+    renderCharts(entries);
   }
 
   window.toggleRunsPanel = toggleRunsPanel;
   window.exportLogsCsv = exportLogsCsv;
 
-  renderRuns();
+  renderDashboard();
   window.addEventListener('storage', function(e) {
-    if (e.key === LOGS_KEY) renderRuns();
+    if (e.key === LOGS_KEY) renderDashboard();
   });
 </script>
 </body>
