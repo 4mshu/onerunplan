@@ -790,6 +790,13 @@
   window.addEventListener('storage', function(e) {
     if (e.key === LOGS_KEY) renderDashboard();
   });
+  // Re-render when page is restored from bfcache (back-nav) or tab regains focus
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted) renderDashboard();
+  });
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) renderDashboard();
+  });
 </script>
 </body>
 </html>
